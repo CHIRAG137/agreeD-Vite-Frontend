@@ -1,42 +1,117 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
   text-align: center;
+  background-color: white;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  position: relative;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.upload-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.card {
-  padding: 2em;
+.upload-button:hover {
+  background-color: #45a049;
 }
 
-.read-the-docs {
-  color: #888;
+.loading {
+  margin-top: 10px;
+  color: #007BFF;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 10px;
+  width: 80%;
+  height: 85%;
+  color: black;
+  max-width: 900px;
+}
+
+textarea {
+  width: 97%;
+  height: 75%;
+  padding: 10px;
+  background-color: white;
+  color: black;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
+textarea::-webkit-scrollbar {
+  width: 8px; 
+  height: 8px; 
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background-color: grey;  
+  border-radius: 10px;         
+  transition: background-color 0.3s;
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background-color: grey; 
+}
+
+textarea::-webkit-scrollbar-track {
+  background-color: #f1f1f1;  
+  border-radius: 10px;
+}
+
+textarea::-webkit-scrollbar-track:hover {
+  background-color: #e0e0e0; 
+}
+
+textarea:focus {
+  border-color: grey;
+  outline: none; 
+}
+
+button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: black;
+  font-size: 14px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: end;
+  padding-right: 10px;
 }
