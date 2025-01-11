@@ -48,6 +48,26 @@
   align-items: center;
 }
 
+.modal input[type="email"],
+.modal input[type="text"],
+.modal textarea {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  color: black;
+  font-size: 14px;
+  transition: border 0.3s ease;
+}
+
+.modal input[type="email"]:focus,
+.modal input[type="text"]:focus,
+.modal textarea:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
 .modal-content {
   background-color: white;
   border-radius: 10px;
