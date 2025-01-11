@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const UploadButton = () => {
   const [file, setFile] = useState(null);
   const [emailContent, setEmailContent] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [subject, setSubject] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,14 +28,19 @@ const UploadButton = () => {
       setIsLoading(true);
 
       // Send the file to the backend API
-      const response = await axios.post("http://localhost:3000/api/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        "http://localhost:3000/api/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       setEmailContent(response.data.emailContent);
-      setIsModalOpen(true); 
+      extractSubjectAndRecipient(response.data.emailContent);
+      setIsModalOpen(true);
     } catch (error) {
       console.error("Error uploading file:", error);
       alert("Error uploading file. Please try again.");
@@ -42,8 +49,30 @@ const UploadButton = () => {
     }
   };
 
+  // Extract subject and recipient email from the email content
+  const extractSubjectAndRecipient = (emailContent) => {
+    const subjectMatch = emailContent.match(/Subject:\s*(.*)/);
+    const recipientMatch = emailContent.match(/To:\s*(.*)/);
+
+    if (subjectMatch) {
+      setSubject(subjectMatch[1]);
+    }
+
+    if (recipientMatch) {
+      setRecipientEmail(recipientMatch[1]);
+    }
+  };
+
   const handleContentChange = (event) => {
     setEmailContent(event.target.value);
+  };
+
+  const handleRecipientEmailChange = (event) => {
+    setRecipientEmail(event.target.value);
+  };
+
+  const handleSubjectChange = (event) => {
+    setSubject(event.target.value);
   };
 
   const closeModal = () => {
@@ -69,7 +98,29 @@ const UploadButton = () => {
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
-            <h2>Edit Email Response</h2>
+            <h4>Edit Email Response</h4>
+
+            {/* Recipient Email Address */}
+            <label htmlFor="recipientEmail">Recipient Email:</label>
+            <input
+              type="email"
+              id="recipientEmail"
+              value={recipientEmail}
+              onChange={handleRecipientEmailChange}
+              placeholder="Enter recipient email"
+            />
+
+            {/* Subject */}
+            <label htmlFor="subject">Subject:</label>
+            <input
+              type="text"
+              id="subject"
+              value={subject}
+              onChange={handleSubjectChange}
+              placeholder="Enter subject"
+            />
+
+            {/* Email Content */}
             <textarea
               value={emailContent}
               onChange={handleContentChange}
@@ -81,6 +132,8 @@ const UploadButton = () => {
               <button
                 onClick={() => {
                   console.log("Modified email content:", emailContent);
+                  console.log("Modified recipient email:", recipientEmail);
+                  console.log("Modified subject:", subject);
                   closeModal();
                 }}
               >
