@@ -9,14 +9,13 @@ const UploadButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const savedFilePath = localStorage.getItem("uploadedFilePath");
-    if (savedFilePath) {
-      console.log("Retrieved file path from localStorage:", savedFilePath);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const savedFilePath = localStorage.getItem("uploadedFilePath");
+  //   if (savedFilePath) {
+  //     console.log("Retrieved file path from localStorage:", savedFilePath);
+  //   }
+  // }, []);
 
-  // Handle file upload
   const handleUpload = async (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -32,8 +31,6 @@ const UploadButton = () => {
 
     try {
       setIsLoading(true);
-
-      // Send the file to the backend API
       const response = await axios.post(
         "http://localhost:3000/api/upload",
         formData,
@@ -44,10 +41,8 @@ const UploadButton = () => {
         }
       );
 
-      // Save the file path to localStorage
-      const filePath = response.data.filePath; // Assuming the backend sends the file path
+      const filePath = response.data.filePath;
       localStorage.setItem("uploadedFilePath", filePath);
-
       console.log("File path saved in localStorage:", filePath);
 
       setEmailContent(response.data.emailContent);
@@ -61,43 +56,43 @@ const UploadButton = () => {
     }
   };
 
-  const handleSendWithoutVideo = async () => {
-    if (!file || !recipientEmail || !subject || !emailContent) {
-      alert("Please fill in all fields and upload a document.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("signerEmail", recipientEmail);
-    formData.append("signerName", "Recipient Name"); // Adjust as needed
-    formData.append("subject", subject);
-    formData.append("emailContent", emailContent);
-
+  const sendDocumentForSigning = async () => {
     try {
       setIsLoading(true);
+      
+      // Get the file path from localStorage
+      const filePath = localStorage.getItem("uploadedFilePath");
+      
+      if (!filePath) {
+        throw new Error("No file path found");
+      }
+
+      // Prepare the request payload for DocuSign
+      const payload = {
+        signerEmail: recipientEmail,
+        signerName: recipientEmail.split('@')[0], // Using email username as name
+        filePath: filePath,
+        emailSubject: subject,
+        emailContent: emailContent
+      };
+
+      // Call the create-envelope endpoint
       const response = await axios.post(
         "http://localhost:3000/api/docusign/create-envelope",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        payload
       );
 
-      alert("Email and document sent successfully!");
-      console.log("Response:", response.data);
+      console.log("Document sent for signing:", response.data);
+      alert("Document has been sent for signing!");
       closeModal();
     } catch (error) {
-      console.error("Error sending email and document:", error);
-      alert("Failed to send email and document.");
+      console.error("Error sending document for signing:", error);
+      alert("Error sending document for signing. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Extract subject and recipient email from the email content
   const extractSubjectAndRecipient = (emailContent) => {
     const subjectMatch = emailContent.match(/Subject:\s*(.*)/);
     const recipientMatch = emailContent.match(/To:\s*(.*)/);
@@ -142,13 +137,11 @@ const UploadButton = () => {
 
       {isLoading && <div className="loading">Uploading...</div>}
 
-      {/* Modal for displaying and editing email content */}
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
             <h4>Edit Email Response</h4>
 
-            {/* Recipient Email Address */}
             <label htmlFor="recipientEmail">Recipient Email:</label>
             <input
               type="email"
@@ -158,7 +151,6 @@ const UploadButton = () => {
               placeholder="Enter recipient email"
             />
 
-            {/* Subject */}
             <label htmlFor="subject">Subject:</label>
             <input
               type="text"
@@ -168,7 +160,6 @@ const UploadButton = () => {
               placeholder="Enter subject"
             />
 
-            {/* Email Content */}
             <textarea
               value={emailContent}
               onChange={handleContentChange}
@@ -177,15 +168,7 @@ const UploadButton = () => {
             />
             <div className="modal-actions">
               <button onClick={closeModal}>Close</button>
-              <button onClick={closeModal}>Send with Video</button>
-              <button
-                onClick={() => {
-                  console.log("Modified email content:", emailContent);
-                  console.log("Modified recipient email:", recipientEmail);
-                  console.log("Modified subject:", subject);
-                  closeModal();
-                }}
-              >
+              <button onClick={sendDocumentForSigning}>
                 Send without Video
               </button>
             </div>
