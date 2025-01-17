@@ -9,6 +9,13 @@ const UploadButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    const savedFilePath = localStorage.getItem("uploadedFilePath");
+    if (savedFilePath) {
+      console.log("Retrieved file path from localStorage:", savedFilePath);
+    }
+  }, []);
+
   // Handle file upload
   const handleUpload = async (event) => {
     const selectedFile = event.target.files[0];
@@ -19,7 +26,6 @@ const UploadButton = () => {
     }
   };
 
-  // Function to send the uploaded file to the API and get the email content
   const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -38,12 +44,54 @@ const UploadButton = () => {
         }
       );
 
+      // Save the file path to localStorage
+      const filePath = response.data.filePath; // Assuming the backend sends the file path
+      localStorage.setItem("uploadedFilePath", filePath);
+
+      console.log("File path saved in localStorage:", filePath);
+
       setEmailContent(response.data.emailContent);
       extractSubjectAndRecipient(response.data.emailContent);
       setIsModalOpen(true);
     } catch (error) {
       console.error("Error uploading file:", error);
       alert("Error uploading file. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSendWithoutVideo = async () => {
+    if (!file || !recipientEmail || !subject || !emailContent) {
+      alert("Please fill in all fields and upload a document.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("signerEmail", recipientEmail);
+    formData.append("signerName", "Recipient Name"); // Adjust as needed
+    formData.append("subject", subject);
+    formData.append("emailContent", emailContent);
+
+    try {
+      setIsLoading(true);
+      const response = await axios.post(
+        "http://localhost:3000/api/docusign/create-envelope",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      alert("Email and document sent successfully!");
+      console.log("Response:", response.data);
+      closeModal();
+    } catch (error) {
+      console.error("Error sending email and document:", error);
+      alert("Failed to send email and document.");
     } finally {
       setIsLoading(false);
     }
@@ -129,6 +177,7 @@ const UploadButton = () => {
             />
             <div className="modal-actions">
               <button onClick={closeModal}>Close</button>
+              <button onClick={closeModal}>Send with Video</button>
               <button
                 onClick={() => {
                   console.log("Modified email content:", emailContent);
@@ -137,7 +186,7 @@ const UploadButton = () => {
                   closeModal();
                 }}
               >
-                Save Changes
+                Send without Video
               </button>
             </div>
           </div>
