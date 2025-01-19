@@ -1,127 +1,273 @@
-import React, { useEffect, useState } from "react";
-import * as pdfjsLib from "pdfjs-dist";
-
-// Configure the worker source
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+import React, { useState, useEffect } from "react";
 
 const PdfPreview = () => {
-  const [pdf, setPdf] = useState(null);
-  const [clickInfo, setClickInfo] = useState({ x: 0, y: 0, page: 0 });
-  const [containerDimensions, setContainerDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
+  const [file, setFile] = useState(null);
+  const [fileUrl, setFileUrl] = useState(null);
+  const [selectedTab, setSelectedTab] = useState(null);  // Track selected tab
+  const [coords, setCoords] = useState({ x: 0, y: 0 });  // Store clicked coordinates
+  const [showModal, setShowModal] = useState(false);  // For modal visibility
+  const [tabDetails, setTabDetails] = useState({}); // Store the filled details for the tab
+  const [pageNumber, setPageNumber] = useState(1);  // Track the page number
 
-  useEffect(() => {
-    const loadPdf = async () => {
-      const pdfUrl = "http://localhost:3000/pdf"; // Use the API route from the server
-      const pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
-      setPdf(pdfDoc);
-
-      // Log the total number of pages in the PDF
-      console.log('Total number of pages:', pdfDoc.numPages);
-    };
-
-    loadPdf();
-  }, []);
-
-  const handleDocClick = (e) => {
-    if (!pdf) return;
-
-    const rect = e.target.getBoundingClientRect(); // Get position of the PDF container
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Estimate page number based on Y position
-    const pageHeight = rect.height / pdf.numPages;
-    const page = Math.floor(y / pageHeight) + 1;
-
-    setClickInfo({ x, y, page });
-
-    // Calculate tab position in points
-    const pageWidthInches = 1000 / 96; // Convert container width (px) to inches (assuming 96 DPI)
-    const pageHeightInches = rect.height / 96; // Convert container height (px) to inches (assuming 96 DPI)
-    
-    // Convert to points (1 inch = 72 points)
-    const xPosition = (x / rect.width) * pageWidthInches * 72;
-    const yPosition = (y / rect.height) * pageHeightInches * 72;
-
-    console.log(`Tab Position (x, y): (${xPosition.toFixed(0)}, ${yPosition.toFixed(0)})`);
+  // Handle file upload
+  const handleFileUpload = (event) => {
+    const uploadedFile = event.target.files[0];
+    if (uploadedFile && uploadedFile.type === "application/pdf") {
+      setFile(uploadedFile);
+      const url = URL.createObjectURL(uploadedFile);
+      setFileUrl(url);
+    }
   };
 
-  const renderPdfPage = (pageNumber) => {
-    if (!pdf) return;
-
-    pdf.getPage(pageNumber).then((page) => {
-      const canvas = document.getElementById(`pdf-page-${pageNumber}`);
-      const context = canvas.getContext("2d");
-
-      // Calculate scale based on the container's width and height
-      const scale = Math.min(
-        containerDimensions.width / page.getViewport({ scale: 1 }).width,
-        containerDimensions.height / page.getViewport({ scale: 1 }).height
-      );
-
-      const viewport = page.getViewport({ scale });
-
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-
-      page.render({ canvasContext: context, viewport }).promise;
-    });
+  // Handle file button click
+  const handleButtonClick = () => {
+    document.getElementById("pdf-upload").click();
   };
 
-  // Handle window resize to update container dimensions
+  // Handle tab selection
+  const handleTabClick = (tab) => {
+    setSelectedTab(tab);
+    setShowModal(true); // Show modal when a tab is selected
+    setTabDetails({});  // Reset tab details for a new tab selection
+  };
+
+  // Handle click on the PDF preview to get coordinates
+  const handleClickOnPdf = (event) => {
+    if (selectedTab) {
+      const rect = event.target.getBoundingClientRect();
+      const x = event.clientX - rect.left; // X coordinate relative to the document
+      const y = event.clientY - rect.top;  // Y coordinate relative to the document
+      setCoords({ x, y });
+    }
+  };
+
+  // Handle form input changes for tab-specific details
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setTabDetails((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle saving the tab position and details
+  const handleSave = () => {
+    // Store or send tab data to backend as needed
+    console.log("Saved tab at:", coords, tabDetails);
+    setShowModal(false); // Close the modal after saving
+  };
+
+  // Handle page number change
+  const handlePageNumberChange = (e) => {
+    setPageNumber(Number(e.target.value));
+  };
+
+  // Clean up the object URL when the component unmounts
   useEffect(() => {
-    const handleResize = () => {
-      const container = document.getElementById("pdf-container");
-      if (container) {
-        setContainerDimensions({
-          width: container.offsetWidth,
-          height: container.offsetHeight,
-        });
+    return () => {
+      if (fileUrl) {
+        URL.revokeObjectURL(fileUrl);
       }
     };
+  }, [fileUrl]);
 
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initialize dimensions
+  // Modal fields for different tab types
+  const renderTabFields = () => {
+    switch (selectedTab?.name) {
+      case "Signature Tabs":
+        return (
+          <>
+            <label>Signer Name:</label>
+            <input
+              type="text"
+              name="signerName"
+              value={tabDetails.signerName || ""}
+              onChange={handleInputChange}
+            />
+          </>
+        );
+      case "Text Tabs":
+        return (
+          <>
+            <label>Text Value:</label>
+            <input
+              type="text"
+              name="textValue"
+              value={tabDetails.textValue || ""}
+              onChange={handleInputChange}
+            />
+            <label>Required:</label>
+            <input
+              type="checkbox"
+              name="required"
+              checked={tabDetails.required || false}
+              onChange={(e) => handleInputChange({ target: { name: "required", value: e.target.checked } })}
+            />
+          </>
+        );
+      case "Date and Time Tabs":
+        return (
+          <>
+            <label>Date Format:</label>
+            <input
+              type="text"
+              name="dateFormat"
+              value={tabDetails.dateFormat || ""}
+              onChange={handleInputChange}
+            />
+          </>
+        );
+      // Add more cases for other tab types like Radio, Checkbox, etc.
+      default:
+        return null;
+    }
+  };
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  // Style for the components
+  const containerStyle = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "100vh",
+    padding: "16px",
+  };
+
+  const cardStyle = {
+    width: "100%",
+    maxWidth: "1000px",
+    padding: "20px",
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+  };
+
+  const buttonStyle = {
+    backgroundColor: "#2563eb",
+    color: "white",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "16px",
+  };
+
+  const previewContainerStyle = {
+    width: "100%",
+    height: "800px",
+    overflow: "hidden",
+    backgroundColor: "#f1f5f9",
+    borderRadius: "8px",
+    position: "relative",
+  };
+
+  const objectStyle = {
+    width: "100%",
+    height: "100%",
+    border: "none",
+  };
+
+  const tabRowStyle = {
+    display: "flex",
+    justifyContent: "space-around",
+    alignItems: "center",
+    flexWrap: "wrap",
+    marginBottom: "16px",
+    gap: "8px",
+  };
+
+  const tabButtonStyle = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#e5e7eb",
+    padding: "10px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    width: "120px",
+    textAlign: "center",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+  };
+
+  const selectedTabButtonStyle = {
+    ...tabButtonStyle,
+    backgroundColor: "#4CAF50", // Green background for selected tab
+  };
+
+  const logoStyle = {
+    width: "40px",
+    height: "40px",
+    marginBottom: "8px",
+  };
+
+  const tabData = [
+    { name: "Signature Tabs", logo: "🖋" },
+    { name: "Text Tabs", logo: "🔤" },
+    { name: "Date and Time Tabs", logo: "⏳" },
+    { name: "Checkboxes", logo: "☑" },
+    { name: "Dropdowns", logo: "🔽" },
+    { name: "Attachments", logo: "📂" },
+    { name: "Payments", logo: "💳" },
+    { name: "Advanced Tabs", logo: "🔒" },
+  ];
 
   return (
-    <div style={{ color: "black", paddingTop: "40px" }}>
-      <div
-        id="pdf-container"
-        style={{
-          width: "1000px", // Adjust this to your desired width
-          height: "530px", // Fixed height
-          overflow: "scroll",
-          position: "relative",
-        }}
-        onClick={handleDocClick}
-      >
-        {pdf &&
-          Array.from({ length: pdf.numPages }, (_, idx) => (
-            <canvas
-              key={idx}
-              id={`pdf-page-${idx + 1}`}
-              style={{ display: "block", marginBottom: "20px", width:"940px" }}
-            />
-          ))}
+    <div style={containerStyle}>
+      <input
+        type="number"
+        value={pageNumber}
+        onChange={handlePageNumberChange}
+        style={{ marginBottom: "16px", padding: "8px", width: "60px" }}
+        min={1}
+        max={1000}
+        placeholder="Page #"
+      />
+      <div style={tabRowStyle}>
+        {tabData.map((tab, index) => (
+          <div
+            key={index}
+            style={selectedTab === tab ? selectedTabButtonStyle : tabButtonStyle}
+            onClick={() => handleTabClick(tab)}
+          >
+            <div style={logoStyle}>{tab.logo}</div>
+            <div>{tab.name}</div>
+          </div>
+        ))}
       </div>
-      {pdf &&
-        Array.from({ length: pdf.numPages }, (_, idx) =>
-          renderPdfPage(idx + 1)
-        )}
-      <div>
-        <p>
-          Clicked at X: {clickInfo.x}, Y: {clickInfo.y}
-        </p>
-        <p>Page Number: {clickInfo.page}</p>
-      </div>
+      {!file ? (
+        <div style={{ textAlign: "center" }}>
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={handleFileUpload}
+            style={{ display: "none" }}
+            id="pdf-upload"
+          />
+          <button onClick={handleButtonClick} style={buttonStyle}>
+            Upload PDF
+          </button>
+        </div>
+      ) : (
+        <div style={cardStyle}>
+          <div style={previewContainerStyle} onClick={handleClickOnPdf}>
+            <object data={fileUrl} type="application/pdf" style={objectStyle}>
+              <embed src={fileUrl} type="application/pdf" style={objectStyle} />
+            </object>
+          </div>
+        </div>
+      )}
+
+      {showModal && (
+        <div className="modal" style={{ position: "fixed", top: "0", left: "0", right: "0", bottom: "0", background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div style={{ padding: "20px", backgroundColor: "#fff", borderRadius: "8px" }}>
+            <h3>{selectedTab?.name}</h3>
+            <p>Coordinates: X: {coords.x}, Y: {coords.y}</p>
+            {renderTabFields()}
+            <button onClick={handleSave} style={{ backgroundColor: "#4CAF50", padding: "10px 20px", color: "white", borderRadius: "5px", cursor: "pointer" }}>Save</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
