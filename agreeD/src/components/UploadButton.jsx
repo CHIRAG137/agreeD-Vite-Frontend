@@ -118,6 +118,54 @@ const UploadButton = () => {
     setSubject(event.target.value);
   };
 
+  const sendWithVideo = async () => {
+    try {
+      setIsLoading(true);
+  
+      // Define the payload
+      const payload = {
+        video_inputs: [
+          {
+            character: {
+              type: "avatar",
+              avatar_id: "Angela-inTshirt-20220820",
+              avatar_style: "normal",
+            },
+            voice: {
+              type: "text",
+              input_text: emailContent || "Welcome to the HeyGen API!",
+              voice_id: "1bd001e7e50f421d891986aad5158bc8",
+              speed: 1.1,
+            },
+          },
+        ],
+        dimension: {
+          width: 1280,
+          height: 720,
+        },
+      };
+  
+      // Call the video generation API
+      const response = await axios.post(
+        "http://localhost:3000/api/heygen/create-avatar-video", // Replace with your endpoint
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      console.log("Video generated successfully:", response.data);
+      alert("Video has been generated successfully!");
+    } catch (error) {
+      console.error("Error generating video:", error);
+      alert("Error generating video. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -170,6 +218,9 @@ const UploadButton = () => {
               <button onClick={closeModal}>Close</button>
               <button onClick={sendDocumentForSigning}>
                 Send without Video
+              </button>
+              <button onClick={sendWithVideo}>
+                Send with Video
               </button>
             </div>
           </div>
