@@ -8,13 +8,38 @@ const UploadButton = () => {
   const [subject, setSubject] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [videoId, setVideoId] = useState(null);
+  const [videoStatus, setVideoStatus] = useState(null);
+  const [videoUrl, setVideoUrl] = useState(null);
 
-  // useEffect(() => {
-  //   const savedFilePath = localStorage.getItem("uploadedFilePath");
-  //   if (savedFilePath) {
-  //     console.log("Retrieved file path from localStorage:", savedFilePath);
-  //   }
-  // }, []);
+  useEffect(() => {
+    let intervalId;
+
+    if (videoId) {
+      intervalId = setInterval(async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:3000/api/heygen/video-status?video_id=${videoId}`
+          );
+
+          const status = response.data.data.data.status;
+          console.log(status)
+          setVideoStatus(status);
+
+          if (status === "completed") {
+            setVideoUrl(response.data.data.video_url);
+            clearInterval(intervalId);
+          }
+        } catch (error) {
+          console.error("Error checking video status:", error);
+        }
+      }, 5000); // Poll every 5 seconds
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [videoId]);
 
   const handleUpload = async (event) => {
     const selectedFile = event.target.files[0];
@@ -35,15 +60,12 @@ const UploadButton = () => {
         "http://localhost:3000/api/upload",
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
 
       const filePath = response.data.filePath;
       localStorage.setItem("uploadedFilePath", filePath);
-      console.log("File path saved in localStorage:", filePath);
 
       setEmailContent(response.data.emailContent);
       extractSubjectAndRecipient(response.data.emailContent);
@@ -56,13 +78,21 @@ const UploadButton = () => {
     }
   };
 
+  const extractSubjectAndRecipient = (emailContent) => {
+    const subjectMatch = emailContent.match(/Subject:\s*(.*)/);
+    const recipientMatch = emailContent.match(/To:\s*(.*)/);
+
+    if (subjectMatch) setSubject(subjectMatch[1]);
+    if (recipientMatch) setRecipientEmail(recipientMatch[1]);
+  };
+
   const sendDocumentForSigning = async () => {
     try {
       setIsLoading(true);
-      
+
       // Get the file path from localStorage
       const filePath = localStorage.getItem("uploadedFilePath");
-      
+
       if (!filePath) {
         throw new Error("No file path found");
       }
@@ -70,10 +100,10 @@ const UploadButton = () => {
       // Prepare the request payload for DocuSign
       const payload = {
         signerEmail: recipientEmail,
-        signerName: recipientEmail.split('@')[0], // Using email username as name
+        signerName: recipientEmail.split("@")[0], // Using email username as name
         filePath: filePath,
         emailSubject: subject,
-        emailContent: emailContent
+        emailContent: emailContent,
       };
 
       // Call the create-envelope endpoint
@@ -93,36 +123,9 @@ const UploadButton = () => {
     }
   };
 
-  const extractSubjectAndRecipient = (emailContent) => {
-    const subjectMatch = emailContent.match(/Subject:\s*(.*)/);
-    const recipientMatch = emailContent.match(/To:\s*(.*)/);
-
-    if (subjectMatch) {
-      setSubject(subjectMatch[1]);
-    }
-
-    if (recipientMatch) {
-      setRecipientEmail(recipientMatch[1]);
-    }
-  };
-
-  const handleContentChange = (event) => {
-    setEmailContent(event.target.value);
-  };
-
-  const handleRecipientEmailChange = (event) => {
-    setRecipientEmail(event.target.value);
-  };
-
-  const handleSubjectChange = (event) => {
-    setSubject(event.target.value);
-  };
-
   const sendWithVideo = async () => {
     try {
       setIsLoading(true);
-  
-      // Define the payload
       const payload = {
         video_inputs: [
           {
@@ -139,25 +142,19 @@ const UploadButton = () => {
             },
           },
         ],
-        dimension: {
-          width: 1280,
-          height: 720,
-        },
+        dimension: { width: 1280, height: 720 },
       };
-  
-      // Call the video generation API
+
       const response = await axios.post(
-        "http://localhost:3000/api/heygen/create-avatar-video", // Replace with your endpoint
+        "http://localhost:3000/api/heygen/create-avatar-video",
         payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
-  
-      console.log("Video generated successfully:", response.data);
-      alert("Video has been generated successfully!");
+
+      const heygenVideoId = response.data.data.video_id;
+      if (heygenVideoId) setVideoId(heygenVideoId);
+
+      alert("Video generated successfully!");
     } catch (error) {
       console.error("Error generating video:", error);
       alert("Error generating video. Please try again.");
@@ -166,9 +163,7 @@ const UploadButton = () => {
     }
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="upload-container">
@@ -188,41 +183,55 @@ const UploadButton = () => {
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
-            <h4>Edit Email Response</h4>
+            {!videoId ? (
+              <>
+                <h4>Edit Email Response</h4>
+                <label htmlFor="recipientEmail">Recipient Email:</label>
+                <input
+                  type="email"
+                  id="recipientEmail"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  placeholder="Enter recipient email"
+                />
 
-            <label htmlFor="recipientEmail">Recipient Email:</label>
-            <input
-              type="email"
-              id="recipientEmail"
-              value={recipientEmail}
-              onChange={handleRecipientEmailChange}
-              placeholder="Enter recipient email"
-            />
+                <label htmlFor="subject">Subject:</label>
+                <input
+                  type="text"
+                  id="subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Enter subject"
+                />
 
-            <label htmlFor="subject">Subject:</label>
-            <input
-              type="text"
-              id="subject"
-              value={subject}
-              onChange={handleSubjectChange}
-              placeholder="Enter subject"
-            />
+                <textarea
+                  value={emailContent}
+                  onChange={(e) => setEmailContent(e.target.value)}
+                  rows="10"
+                  cols="50"
+                />
 
-            <textarea
-              value={emailContent}
-              onChange={handleContentChange}
-              rows="10"
-              cols="50"
-            />
-            <div className="modal-actions">
-              <button onClick={closeModal}>Close</button>
-              <button onClick={sendDocumentForSigning}>
-                Send without Video
-              </button>
-              <button onClick={sendWithVideo}>
-                Send with Video
-              </button>
-            </div>
+                <div className="modal-actions">
+                  <button onClick={closeModal}>Close</button>
+                  <button onClick={sendDocumentForSigning}>Send without Video</button>
+                  <button onClick={sendWithVideo}>Generate Video</button>
+                </div>
+              </>
+            ) : (
+              <>
+                {videoStatus === "processing" && (
+                  <div className="status-message" style={{color:"black"}}>Video is processing...</div>
+                )}
+                {videoUrl && (
+                  <div className="video-preview">
+                    <video src={videoUrl} controls />
+                  </div>
+                )}
+                <div className="modal-actions">
+                  <button onClick={sendWithVideo}>Send with Video</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
