@@ -90,7 +90,6 @@ const UploadButton = () => {
       const { emailContent, structuredDetails } = response.data;
       setEmailContent(emailContent);
       setStructuredDetails(structuredDetails || {});
-      console.log(structuredDetails)
       extractSubjectAndRecipient(emailContent);
       setIsModalOpen(true);
     } catch (error) {
@@ -313,7 +312,7 @@ const UploadButton = () => {
                     <label>Cost:</label>
                     <input
                       type="text"
-                      value={structuredDetails.cost || ""}
+                      value={structuredDetails.paymentTerms || ""}
                       onChange={(e) =>
                         setStructuredDetails({
                           ...structuredDetails,
@@ -321,10 +320,21 @@ const UploadButton = () => {
                         })
                       }
                     />
-                    <label>Emails and Phones:</label>
+                    <label>Emails</label>
                     <textarea
                       rows="3"
-                      value={structuredDetails.contacts || ""}
+                      value={structuredDetails.emailAddresses || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          contacts: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Phone Numbers</label>
+                    <textarea
+                      rows="3"
+                      value={structuredDetails.phoneNumbers || ""}
                       onChange={(e) =>
                         setStructuredDetails({
                           ...structuredDetails,
