@@ -11,6 +11,10 @@ const UploadButton = () => {
   const [videoId, setVideoId] = useState(null);
   const [videoStatus, setVideoStatus] = useState(null);
   const [videoUrl, setVideoUrl] = useState(null);
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
+  const [structuredDetails, setStructuredDetails] = useState({});
 
   useEffect(() => {
     let intervalId;
@@ -23,7 +27,7 @@ const UploadButton = () => {
           );
 
           const status = response.data.data.data.status;
-          console.log(status)
+          console.log(status);
           setVideoStatus(status);
 
           if (status === "completed") {
@@ -40,6 +44,22 @@ const UploadButton = () => {
       if (intervalId) clearInterval(intervalId);
     };
   }, [videoId]);
+
+  useEffect(() => {
+    // Fetch templates when the component mounts
+    const fetchTemplates = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/docusign/fetch-templates"
+        );
+        setTemplates(response.data.templates); // Adjust based on the API response structure
+      } catch (error) {
+        console.error("Error fetching templates:", error);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   const handleUpload = async (event) => {
     const selectedFile = event.target.files[0];
@@ -67,8 +87,11 @@ const UploadButton = () => {
       const filePath = response.data.filePath;
       localStorage.setItem("uploadedFilePath", filePath);
 
-      setEmailContent(response.data.emailContent);
-      extractSubjectAndRecipient(response.data.emailContent);
+      const { emailContent, structuredDetails } = response.data;
+      setEmailContent(emailContent);
+      setStructuredDetails(structuredDetails || {});
+      console.log(structuredDetails)
+      extractSubjectAndRecipient(emailContent);
       setIsModalOpen(true);
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -163,13 +186,54 @@ const UploadButton = () => {
     }
   };
 
+  const handleTemplateChange = (event) => {
+    setSelectedTemplate(event.target.value);
+    setShowTemplateDropdown(false); // Hide dropdown after selection
+  };
+
   const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="upload-container">
-      <label htmlFor="upload" className="upload-button">
-        Upload Document
-      </label>
+      <div className="button-group">
+        {!showTemplateDropdown && (
+          <>
+            <label htmlFor="upload" className="upload-button">
+              Upload Document
+            </label>
+            <input
+              type="file"
+              id="upload"
+              style={{ display: "none" }}
+              onChange={handleUpload}
+              accept=".pdf,.docx"
+            />
+            <button
+              onClick={() => setShowTemplateDropdown(true)}
+              className="upload-button"
+            >
+              Use Template
+            </button>
+          </>
+        )}
+
+        {showTemplateDropdown && (
+          <select
+            onChange={handleTemplateChange}
+            value={selectedTemplate}
+            className="template-dropdown"
+          >
+            <option value="">Select a Template</option>
+            {templates.map((template) => (
+              <option key={template.templateId} value={template.templateId}>
+                {template.name}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {isLoading && <div className="loading">Uploading...</div>}
       <input
         type="file"
         id="upload"
@@ -180,30 +244,120 @@ const UploadButton = () => {
 
       {isLoading && <div className="loading">Uploading...</div>}
 
+      {/* Display email input when a template is selected */}
+      {selectedTemplate && (
+        <div className="email-section">
+          <h4>Enter Email Details</h4>
+          <label htmlFor="recipientEmail">Recipient Email:</label>
+          <input
+            type="email"
+            id="recipientEmail"
+            value={recipientEmail}
+            onChange={(e) => setRecipientEmail(e.target.value)}
+            placeholder="Enter recipient email"
+          />
+        </div>
+      )}
+
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
-            {!videoId ? (
-              <>
-                <h4>Edit Email Response</h4>
-                <label htmlFor="recipientEmail">Recipient Email:</label>
-                <input
-                  type="email"
-                  id="recipientEmail"
-                  value={recipientEmail}
-                  onChange={(e) => setRecipientEmail(e.target.value)}
-                  placeholder="Enter recipient email"
-                />
-
-                <label htmlFor="subject">Subject:</label>
-                <input
-                  type="text"
-                  id="subject"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Enter subject"
-                />
-
+            <div className="row">
+              <div className="details-column">
+                {structuredDetails && (
+                  <>
+                    <label>Client Name:</label>
+                    <input
+                      type="text"
+                      value={structuredDetails.clientName || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          clientName: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Contact Person:</label>
+                    <input
+                      type="text"
+                      value={structuredDetails.contactPerson || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          contactPerson: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Important Dates:</label>
+                    <textarea
+                      rows="3"
+                      value={structuredDetails.dates || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          dates: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Address:</label>
+                    <input
+                      type="text"
+                      value={structuredDetails.address || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          address: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Cost:</label>
+                    <input
+                      type="text"
+                      value={structuredDetails.cost || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          cost: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Emails and Phones:</label>
+                    <textarea
+                      rows="3"
+                      value={structuredDetails.contacts || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          contacts: e.target.value,
+                        })
+                      }
+                    />
+                  </>
+                )}
+              </div>
+              <div className="email-column">
+                <div style={{ display: "flex", gap:"10px" }}>
+                  <div>
+                    <label htmlFor="recipientEmail">Recipient Email:</label>
+                    <input
+                      type="email"
+                      id="recipientEmail"
+                      value={recipientEmail}
+                      onChange={(e) => setRecipientEmail(e.target.value)}
+                      placeholder="Enter recipient email"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="subject">Subject:</label>
+                    <input
+                      type="text"
+                      id="subject"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      placeholder="Enter subject"
+                    />
+                  </div>
+                </div>
                 <textarea
                   value={emailContent}
                   onChange={(e) => setEmailContent(e.target.value)}
@@ -213,25 +367,13 @@ const UploadButton = () => {
 
                 <div className="modal-actions">
                   <button onClick={closeModal}>Close</button>
-                  <button onClick={sendDocumentForSigning}>Send without Video</button>
+                  <button onClick={sendDocumentForSigning}>
+                    Send without Video
+                  </button>
                   <button onClick={sendWithVideo}>Generate Video</button>
                 </div>
-              </>
-            ) : (
-              <>
-                {videoStatus === "processing" && (
-                  <div className="status-message" style={{color:"black"}}>Video is processing...</div>
-                )}
-                {videoUrl && (
-                  <div className="video-preview">
-                    <video src={videoUrl} controls />
-                  </div>
-                )}
-                <div className="modal-actions">
-                  <button onClick={sendWithVideo}>Send with Video</button>
-                </div>
-              </>
-            )}
+              </div>
+            </div>
           </div>
         </div>
       )}
