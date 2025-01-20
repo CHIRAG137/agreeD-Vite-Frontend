@@ -111,39 +111,68 @@ const UploadButton = () => {
   const sendDocumentForSigning = async () => {
     try {
       setIsLoading(true);
-
+  
       // Get the file path from localStorage
       const filePath = localStorage.getItem("uploadedFilePath");
-
+  
       if (!filePath) {
         throw new Error("No file path found");
       }
-
-      // Prepare the request payload for DocuSign
-      const payload = {
+  
+      // Step 1: Prepare the payload for creating an envelope
+      const envelopePayload = {
         signerEmail: recipientEmail,
         signerName: recipientEmail.split("@")[0], // Using email username as name
         filePath: filePath,
         emailSubject: subject,
         emailContent: emailContent,
       };
-
-      // Call the create-envelope endpoint
-      const response = await axios.post(
+  
+      // Step 2: Call the create-envelope endpoint
+      const envelopeResponse = await axios.post(
         "http://localhost:3000/api/docusign/create-envelope",
-        payload
+        envelopePayload
       );
-
-      console.log("Document sent for signing:", response.data);
-      alert("Document has been sent for signing!");
+  
+      console.log("Envelope created:", envelopeResponse.data);
+  
+      if (!envelopeResponse.data || !envelopeResponse.data.envelopeId) {
+        throw new Error("Failed to create envelope. No envelope ID returned.");
+      }
+  
+      const envelopeId = envelopeResponse.data.envelopeId;
+  
+      // Step 3: Prepare the payload for saving data
+      const savePayload = {
+        structuredDetails,
+        emailContent,
+        subject,
+        recipientEmail,
+        envelopeId, // Include the envelope ID in the saved data
+      };
+  
+      // Step 4: Call the API to save data
+      const saveResponse = await axios.post(
+        "http://localhost:3000/api/client/save",
+        savePayload
+      );
+  
+      if (saveResponse.data.success) {
+        console.log("Details saved successfully:", saveResponse.data.data);
+        alert("Document sent for signing and details saved successfully!");
+      } else {
+        throw new Error("Failed to save details.");
+      }
+  
       closeModal();
     } catch (error) {
-      console.error("Error sending document for signing:", error);
-      alert("Error sending document for signing. Please try again.");
+      console.error("Error in sendDocumentForSigning:", error);
+      alert("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   const sendWithVideo = async () => {
     try {
