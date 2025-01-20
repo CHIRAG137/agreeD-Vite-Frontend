@@ -8,13 +8,58 @@ const UploadButton = () => {
   const [subject, setSubject] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [videoId, setVideoId] = useState(null);
+  const [videoStatus, setVideoStatus] = useState(null);
+  const [videoUrl, setVideoUrl] = useState(null);
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
+  const [structuredDetails, setStructuredDetails] = useState({});
 
-  // useEffect(() => {
-  //   const savedFilePath = localStorage.getItem("uploadedFilePath");
-  //   if (savedFilePath) {
-  //     console.log("Retrieved file path from localStorage:", savedFilePath);
-  //   }
-  // }, []);
+  useEffect(() => {
+    let intervalId;
+
+    if (videoId) {
+      intervalId = setInterval(async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:3000/api/heygen/video-status?video_id=${videoId}`
+          );
+
+          const status = response.data.data.data.status;
+          console.log(status);
+          setVideoStatus(status);
+
+          if (status === "completed") {
+            setVideoUrl(response.data.data.video_url);
+            clearInterval(intervalId);
+          }
+        } catch (error) {
+          console.error("Error checking video status:", error);
+        }
+      }, 5000); // Poll every 5 seconds
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [videoId]);
+
+  useEffect(() => {
+    // Fetch templates when the component mounts
+    const fetchTemplates = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/docusign/fetch-templates"
+        );
+        setTemplates(response.data.templates); // Adjust based on the API response structure
+      } catch (error) {
+        console.error("Error fetching templates:", error);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   const handleUpload = async (event) => {
     const selectedFile = event.target.files[0];
@@ -35,18 +80,17 @@ const UploadButton = () => {
         "http://localhost:3000/api/upload",
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
 
       const filePath = response.data.filePath;
       localStorage.setItem("uploadedFilePath", filePath);
-      console.log("File path saved in localStorage:", filePath);
 
-      setEmailContent(response.data.emailContent);
-      extractSubjectAndRecipient(response.data.emailContent);
+      const { emailContent, structuredDetails } = response.data;
+      setEmailContent(emailContent);
+      setStructuredDetails(structuredDetails || {});
+      extractSubjectAndRecipient(emailContent);
       setIsModalOpen(true);
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -56,73 +100,82 @@ const UploadButton = () => {
     }
   };
 
+  const extractSubjectAndRecipient = (emailContent) => {
+    const subjectMatch = emailContent.match(/Subject:\s*(.*)/);
+    const recipientMatch = emailContent.match(/To:\s*(.*)/);
+
+    if (subjectMatch) setSubject(subjectMatch[1]);
+    if (recipientMatch) setRecipientEmail(recipientMatch[1]);
+  };
+
   const sendDocumentForSigning = async () => {
     try {
       setIsLoading(true);
-      
+
       // Get the file path from localStorage
       const filePath = localStorage.getItem("uploadedFilePath");
-      
+
       if (!filePath) {
         throw new Error("No file path found");
       }
 
-      // Prepare the request payload for DocuSign
-      const payload = {
+      // Step 1: Prepare the payload for creating an envelope
+      const envelopePayload = {
         signerEmail: recipientEmail,
-        signerName: recipientEmail.split('@')[0], // Using email username as name
+        signerName: recipientEmail.split("@")[0], // Using email username as name
         filePath: filePath,
         emailSubject: subject,
-        emailContent: emailContent
+        emailContent: emailContent,
       };
 
-      // Call the create-envelope endpoint
-      const response = await axios.post(
+      // Step 2: Call the create-envelope endpoint
+      const envelopeResponse = await axios.post(
         "http://localhost:3000/api/docusign/create-envelope",
-        payload
+        envelopePayload
       );
 
-      console.log("Document sent for signing:", response.data);
-      alert("Document has been sent for signing!");
+      console.log("Envelope created:", envelopeResponse.data);
+
+      if (!envelopeResponse.data || !envelopeResponse.data.envelopeId) {
+        throw new Error("Failed to create envelope. No envelope ID returned.");
+      }
+
+      const envelopeId = envelopeResponse.data.envelopeId;
+
+      // Step 3: Prepare the payload for saving data
+      const savePayload = {
+        structuredDetails,
+        emailContent,
+        subject,
+        recipientEmail,
+        envelopeId, // Include the envelope ID in the saved data
+      };
+
+      // Step 4: Call the API to save data
+      const saveResponse = await axios.post(
+        "http://localhost:3000/api/client/save",
+        savePayload
+      );
+
+      if (saveResponse.data.success) {
+        console.log("Details saved successfully:", saveResponse.data.data);
+        alert("Document sent for signing and details saved successfully!");
+      } else {
+        throw new Error("Failed to save details.");
+      }
+
       closeModal();
     } catch (error) {
-      console.error("Error sending document for signing:", error);
-      alert("Error sending document for signing. Please try again.");
+      console.error("Error in sendDocumentForSigning:", error);
+      alert("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const extractSubjectAndRecipient = (emailContent) => {
-    const subjectMatch = emailContent.match(/Subject:\s*(.*)/);
-    const recipientMatch = emailContent.match(/To:\s*(.*)/);
-
-    if (subjectMatch) {
-      setSubject(subjectMatch[1]);
-    }
-
-    if (recipientMatch) {
-      setRecipientEmail(recipientMatch[1]);
-    }
-  };
-
-  const handleContentChange = (event) => {
-    setEmailContent(event.target.value);
-  };
-
-  const handleRecipientEmailChange = (event) => {
-    setRecipientEmail(event.target.value);
-  };
-
-  const handleSubjectChange = (event) => {
-    setSubject(event.target.value);
-  };
-
   const sendWithVideo = async () => {
     try {
       setIsLoading(true);
-  
-      // Define the payload
       const payload = {
         video_inputs: [
           {
@@ -139,25 +192,19 @@ const UploadButton = () => {
             },
           },
         ],
-        dimension: {
-          width: 1280,
-          height: 720,
-        },
+        dimension: { width: 1280, height: 720 },
       };
-  
-      // Call the video generation API
+
       const response = await axios.post(
-        "http://localhost:3000/api/heygen/create-avatar-video", // Replace with your endpoint
+        "http://localhost:3000/api/heygen/create-avatar-video",
         payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
-  
-      console.log("Video generated successfully:", response.data);
-      alert("Video has been generated successfully!");
+
+      const heygenVideoId = response.data.data.video_id;
+      if (heygenVideoId) setVideoId(heygenVideoId);
+
+      alert("Video generated successfully!");
     } catch (error) {
       console.error("Error generating video:", error);
       alert("Error generating video. Please try again.");
@@ -166,15 +213,54 @@ const UploadButton = () => {
     }
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const handleTemplateChange = (event) => {
+    setSelectedTemplate(event.target.value);
+    setShowTemplateDropdown(false); // Hide dropdown after selection
   };
+
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="upload-container">
-      <label htmlFor="upload" className="upload-button">
-        Upload Document
-      </label>
+      <div className="button-group">
+        {!showTemplateDropdown && (
+          <>
+            <label htmlFor="upload" className="upload-button">
+              Upload Document
+            </label>
+            <input
+              type="file"
+              id="upload"
+              style={{ display: "none" }}
+              onChange={handleUpload}
+              accept=".pdf,.docx"
+            />
+            <button
+              onClick={() => setShowTemplateDropdown(true)}
+              className="upload-button"
+            >
+              Use Template
+            </button>
+          </>
+        )}
+
+        {showTemplateDropdown && (
+          <select
+            onChange={handleTemplateChange}
+            value={selectedTemplate}
+            className="template-dropdown"
+          >
+            <option value="">Select a Template</option>
+            {templates.map((template) => (
+              <option key={template.templateId} value={template.templateId}>
+                {template.name}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {isLoading && <div className="loading">Uploading...</div>}
       <input
         type="file"
         id="upload"
@@ -185,43 +271,268 @@ const UploadButton = () => {
 
       {isLoading && <div className="loading">Uploading...</div>}
 
+      {/* Display email input when a template is selected */}
+      {selectedTemplate && (
+        <div className="email-section">
+          <h4>Enter Email Details</h4>
+          <label htmlFor="recipientEmail">Recipient Email:</label>
+          <input
+            type="email"
+            id="recipientEmail"
+            value={recipientEmail}
+            onChange={(e) => setRecipientEmail(e.target.value)}
+            placeholder="Enter recipient email"
+          />
+        </div>
+      )}
+
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
-            <h4>Edit Email Response</h4>
+            <div className="row">
+              <div className="details-column">
+                {structuredDetails && (
+                  <>
+                    <label>Client Name:</label>
+                    <input
+                      type="text"
+                      value={structuredDetails.clientName || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          clientName: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Contact Person:</label>
+                    <input
+                      type="text"
+                      value={structuredDetails.contactPerson || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          contactPerson: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Important Dates:</label>
+                    <textarea
+                      rows="3"
+                      value={structuredDetails.dates || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          dates: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Address:</label>
+                    <input
+                      type="text"
+                      value={structuredDetails.address || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          address: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Cost:</label>
+                    <input
+                      type="text"
+                      value={structuredDetails.paymentTerms || ""}
+                      onChange={(e) =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          cost: e.target.value,
+                        })
+                      }
+                    />
+                    <label>Emails</label>
+                    {structuredDetails.emailAddresses &&
+                      structuredDetails.emailAddresses.map(
+                        (emailObj, index) => (
+                          <div
+                            key={`email-${index}`}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column", // Change to column layout
+                              marginBottom: "20px", // Optional for spacing between groups
+                            }}
+                          >
+                            <input
+                              type="text"
+                              placeholder="Name"
+                              value={emailObj.entity}
+                              onChange={(e) => {
+                                const updatedEmails = [
+                                  ...structuredDetails.emailAddresses,
+                                ];
+                                updatedEmails[index].entity = e.target.value;
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  emailAddresses: updatedEmails,
+                                });
+                              }}
+                            />
+                            <input
+                              type="email"
+                              placeholder="Email"
+                              value={emailObj.email}
+                              onChange={(e) => {
+                                const updatedEmails = [
+                                  ...structuredDetails.emailAddresses,
+                                ];
+                                updatedEmails[index].email = e.target.value;
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  emailAddresses: updatedEmails,
+                                });
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                const updatedEmails =
+                                  structuredDetails.emailAddresses.filter(
+                                    (_, i) => i !== index
+                                  );
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  emailAddresses: updatedEmails,
+                                });
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        )
+                      )}
+                    <button
+                      onClick={() =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          emailAddresses: [
+                            ...(structuredDetails.emailAddresses || []),
+                            { name: "", email: "" },
+                          ],
+                        })
+                      }
+                    >
+                      Add Email
+                    </button>
 
-            <label htmlFor="recipientEmail">Recipient Email:</label>
-            <input
-              type="email"
-              id="recipientEmail"
-              value={recipientEmail}
-              onChange={handleRecipientEmailChange}
-              placeholder="Enter recipient email"
-            />
+                    <label>Phone Numbers</label>
+                    {structuredDetails.phoneNumbers &&
+                      structuredDetails.phoneNumbers.map((phoneObj, index) => (
+                        <div
+                          key={`phone-${index}`}
+                          style={{
+                            display: "flex",
+                            flexDirection: "column", // Change to column layout
+                            gap: "10px",
+                            marginBottom: "20px", // Optional for spacing between groups
+                          }}
+                        >
+                          <input
+                            type="text"
+                            placeholder="Name"
+                            value={phoneObj.entity}
+                            onChange={(e) => {
+                              const updatedPhones = [
+                                ...structuredDetails.phoneNumbers,
+                              ];
+                              updatedPhones[index].entity = e.target.value;
+                              setStructuredDetails({
+                                ...structuredDetails,
+                                phoneNumbers: updatedPhones,
+                              });
+                            }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Phone"
+                            value={phoneObj.phoneNumber}
+                            onChange={(e) => {
+                              const updatedPhones = [
+                                ...structuredDetails.phoneNumbers,
+                              ];
+                              updatedPhones[index].phoneNumber = e.target.value;
+                              setStructuredDetails({
+                                ...structuredDetails,
+                                phoneNumbers: updatedPhones,
+                              });
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              const updatedPhones =
+                                structuredDetails.phoneNumbers.filter(
+                                  (_, i) => i !== index
+                                );
+                              setStructuredDetails({
+                                ...structuredDetails,
+                                phoneNumbers: updatedPhones,
+                              });
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    <button
+                      onClick={() =>
+                        setStructuredDetails({
+                          ...structuredDetails,
+                          phoneNumbers: [
+                            ...(structuredDetails.phoneNumbers || []),
+                            { name: "", phone: "" },
+                          ],
+                        })
+                      }
+                    >
+                      Add Phone Number
+                    </button>
+                  </>
+                )}
+              </div>
+              <div className="email-column">
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <div>
+                    <label htmlFor="recipientEmail">Recipient Email:</label>
+                    <input
+                      type="email"
+                      id="recipientEmail"
+                      value={recipientEmail}
+                      onChange={(e) => setRecipientEmail(e.target.value)}
+                      placeholder="Enter recipient email"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="subject">Subject:</label>
+                    <input
+                      type="text"
+                      id="subject"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      placeholder="Enter subject"
+                    />
+                  </div>
+                </div>
+                <textarea
+                  value={emailContent}
+                  onChange={(e) => setEmailContent(e.target.value)}
+                  rows="10"
+                  cols="50"
+                />
 
-            <label htmlFor="subject">Subject:</label>
-            <input
-              type="text"
-              id="subject"
-              value={subject}
-              onChange={handleSubjectChange}
-              placeholder="Enter subject"
-            />
-
-            <textarea
-              value={emailContent}
-              onChange={handleContentChange}
-              rows="10"
-              cols="50"
-            />
-            <div className="modal-actions">
-              <button onClick={closeModal}>Close</button>
-              <button onClick={sendDocumentForSigning}>
-                Send without Video
-              </button>
-              <button onClick={sendWithVideo}>
-                Send with Video
-              </button>
+                <div className="modal-actions">
+                  <button onClick={closeModal}>Close</button>
+                  <button onClick={sendDocumentForSigning}>
+                    Send without Video
+                  </button>
+                  <button onClick={sendWithVideo}>Generate Video</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
