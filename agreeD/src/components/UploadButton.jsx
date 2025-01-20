@@ -111,14 +111,14 @@ const UploadButton = () => {
   const sendDocumentForSigning = async () => {
     try {
       setIsLoading(true);
-  
+
       // Get the file path from localStorage
       const filePath = localStorage.getItem("uploadedFilePath");
-  
+
       if (!filePath) {
         throw new Error("No file path found");
       }
-  
+
       // Step 1: Prepare the payload for creating an envelope
       const envelopePayload = {
         signerEmail: recipientEmail,
@@ -127,21 +127,21 @@ const UploadButton = () => {
         emailSubject: subject,
         emailContent: emailContent,
       };
-  
+
       // Step 2: Call the create-envelope endpoint
       const envelopeResponse = await axios.post(
         "http://localhost:3000/api/docusign/create-envelope",
         envelopePayload
       );
-  
+
       console.log("Envelope created:", envelopeResponse.data);
-  
+
       if (!envelopeResponse.data || !envelopeResponse.data.envelopeId) {
         throw new Error("Failed to create envelope. No envelope ID returned.");
       }
-  
+
       const envelopeId = envelopeResponse.data.envelopeId;
-  
+
       // Step 3: Prepare the payload for saving data
       const savePayload = {
         structuredDetails,
@@ -150,20 +150,20 @@ const UploadButton = () => {
         recipientEmail,
         envelopeId, // Include the envelope ID in the saved data
       };
-  
+
       // Step 4: Call the API to save data
       const saveResponse = await axios.post(
         "http://localhost:3000/api/client/save",
         savePayload
       );
-  
+
       if (saveResponse.data.success) {
         console.log("Details saved successfully:", saveResponse.data.data);
         alert("Document sent for signing and details saved successfully!");
       } else {
         throw new Error("Failed to save details.");
       }
-  
+
       closeModal();
     } catch (error) {
       console.error("Error in sendDocumentForSigning:", error);
@@ -172,7 +172,6 @@ const UploadButton = () => {
       setIsLoading(false);
     }
   };
-  
 
   const sendWithVideo = async () => {
     try {
@@ -350,32 +349,154 @@ const UploadButton = () => {
                       }
                     />
                     <label>Emails</label>
-                    <textarea
-                      rows="3"
-                      value={structuredDetails.emailAddresses || ""}
-                      onChange={(e) =>
+                    {structuredDetails.emailAddresses &&
+                      structuredDetails.emailAddresses.map(
+                        (emailObj, index) => (
+                          <div
+                            key={`email-${index}`}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column", // Change to column layout
+                              marginBottom: "20px", // Optional for spacing between groups
+                            }}
+                          >
+                            <input
+                              type="text"
+                              placeholder="Name"
+                              value={emailObj.entity}
+                              onChange={(e) => {
+                                const updatedEmails = [
+                                  ...structuredDetails.emailAddresses,
+                                ];
+                                updatedEmails[index].entity = e.target.value;
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  emailAddresses: updatedEmails,
+                                });
+                              }}
+                            />
+                            <input
+                              type="email"
+                              placeholder="Email"
+                              value={emailObj.email}
+                              onChange={(e) => {
+                                const updatedEmails = [
+                                  ...structuredDetails.emailAddresses,
+                                ];
+                                updatedEmails[index].email = e.target.value;
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  emailAddresses: updatedEmails,
+                                });
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                const updatedEmails =
+                                  structuredDetails.emailAddresses.filter(
+                                    (_, i) => i !== index
+                                  );
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  emailAddresses: updatedEmails,
+                                });
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        )
+                      )}
+                    <button
+                      onClick={() =>
                         setStructuredDetails({
                           ...structuredDetails,
-                          contacts: e.target.value,
+                          emailAddresses: [
+                            ...(structuredDetails.emailAddresses || []),
+                            { name: "", email: "" },
+                          ],
                         })
                       }
-                    />
+                    >
+                      Add Email
+                    </button>
+
                     <label>Phone Numbers</label>
-                    <textarea
-                      rows="3"
-                      value={structuredDetails.phoneNumbers || ""}
-                      onChange={(e) =>
+                    {structuredDetails.phoneNumbers &&
+                      structuredDetails.phoneNumbers.map((phoneObj, index) => (
+                        <div
+                          key={`phone-${index}`}
+                          style={{
+                            display: "flex",
+                            flexDirection: "column", // Change to column layout
+                            gap: "10px",
+                            marginBottom: "20px", // Optional for spacing between groups
+                          }}
+                        >
+                          <input
+                            type="text"
+                            placeholder="Name"
+                            value={phoneObj.entity}
+                            onChange={(e) => {
+                              const updatedPhones = [
+                                ...structuredDetails.phoneNumbers,
+                              ];
+                              updatedPhones[index].entity = e.target.value;
+                              setStructuredDetails({
+                                ...structuredDetails,
+                                phoneNumbers: updatedPhones,
+                              });
+                            }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Phone"
+                            value={phoneObj.phoneNumber}
+                            onChange={(e) => {
+                              const updatedPhones = [
+                                ...structuredDetails.phoneNumbers,
+                              ];
+                              updatedPhones[index].phoneNumber = e.target.value;
+                              setStructuredDetails({
+                                ...structuredDetails,
+                                phoneNumbers: updatedPhones,
+                              });
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              const updatedPhones =
+                                structuredDetails.phoneNumbers.filter(
+                                  (_, i) => i !== index
+                                );
+                              setStructuredDetails({
+                                ...structuredDetails,
+                                phoneNumbers: updatedPhones,
+                              });
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    <button
+                      onClick={() =>
                         setStructuredDetails({
                           ...structuredDetails,
-                          contacts: e.target.value,
+                          phoneNumbers: [
+                            ...(structuredDetails.phoneNumbers || []),
+                            { name: "", phone: "" },
+                          ],
                         })
                       }
-                    />
+                    >
+                      Add Phone Number
+                    </button>
                   </>
                 )}
               </div>
               <div className="email-column">
-                <div style={{ display: "flex", gap:"10px" }}>
+                <div style={{ display: "flex", gap: "10px" }}>
                   <div>
                     <label htmlFor="recipientEmail">Recipient Email:</label>
                     <input
