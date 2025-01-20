@@ -16,34 +16,34 @@ const UploadButton = () => {
   const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
   const [structuredDetails, setStructuredDetails] = useState({});
 
-  useEffect(() => {
-    let intervalId;
+  // useEffect(() => {
+  //   let intervalId;
 
-    if (videoId) {
-      intervalId = setInterval(async () => {
-        try {
-          const response = await axios.get(
-            `http://localhost:3000/api/heygen/video-status?video_id=${videoId}`
-          );
+  //   if (videoId) {
+  //     intervalId = setInterval(async () => {
+  //       try {
+  //         const response = await axios.get(
+  //           `http://localhost:3000/api/heygen/video-status?video_id=${videoId}`
+  //         );
 
-          const status = response.data.data.data.status;
-          console.log(status);
-          setVideoStatus(status);
+  //         const status = response.data.data.data.status;
+  //         console.log(status);
+  //         setVideoStatus(status);
 
-          if (status === "completed") {
-            setVideoUrl(response.data.data.video_url);
-            clearInterval(intervalId);
-          }
-        } catch (error) {
-          console.error("Error checking video status:", error);
-        }
-      }, 5000); // Poll every 5 seconds
-    }
+  //         if (status === "completed") {
+  //           setVideoUrl(response.data.data.video_url);
+  //           clearInterval(intervalId);
+  //         }
+  //       } catch (error) {
+  //         console.error("Error checking video status:", error);
+  //       }
+  //     }, 5000); // Poll every 5 seconds
+  //   }
 
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [videoId]);
+  //   return () => {
+  //     if (intervalId) clearInterval(intervalId);
+  //   };
+  // }, [videoId]);
 
   useEffect(() => {
     // Fetch templates when the component mounts
@@ -119,7 +119,41 @@ const UploadButton = () => {
         throw new Error("No file path found");
       }
 
-      // Step 1: Prepare the payload for creating an envelope
+      // Step 1: Prepare the payload for creating the video (sendWithVideo)
+      const videoPayload = {
+        video_inputs: [
+          {
+            character: {
+              type: "avatar",
+              avatar_id: "Angela-inTshirt-20220820",
+              avatar_style: "normal",
+            },
+            voice: {
+              type: "text",
+              input_text: emailContent || "Welcome to the HeyGen API!",
+              voice_id: "1bd001e7e50f421d891986aad5158bc8",
+              speed: 1.1,
+            },
+          },
+        ],
+        dimension: { width: 1280, height: 720 },
+      };
+
+      // Step 2: Call the Heygen API to create the video
+      const videoResponse = await axios.post(
+        "http://localhost:3000/api/heygen/create-avatar-video",
+        videoPayload,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      const heygenVideoId = videoResponse.data.data.video_id;
+      if (!heygenVideoId) {
+        throw new Error("Failed to generate video.");
+      }
+
+      console.log("Video generated with ID:", heygenVideoId);
+
+      // Step 3: Prepare the payload for creating an envelope (DocuSign)
       const envelopePayload = {
         signerEmail: recipientEmail,
         signerName: recipientEmail.split("@")[0], // Using email username as name
@@ -128,7 +162,7 @@ const UploadButton = () => {
         emailContent: emailContent,
       };
 
-      // Step 2: Call the create-envelope endpoint
+      // Step 4: Call the create-envelope endpoint to create the envelope
       const envelopeResponse = await axios.post(
         "http://localhost:3000/api/docusign/create-envelope",
         envelopePayload
@@ -142,16 +176,17 @@ const UploadButton = () => {
 
       const envelopeId = envelopeResponse.data.envelopeId;
 
-      // Step 3: Prepare the payload for saving data
+      // Step 5: Prepare the payload for saving data, including video ID
       const savePayload = {
         structuredDetails,
         emailContent,
         subject,
         recipientEmail,
-        envelopeId, // Include the envelope ID in the saved data
+        envelopeId, // Include the envelope ID
+        heygenVideoId: heygenVideoId, // Include the video ID
       };
 
-      // Step 4: Call the API to save data
+      // Step 6: Call the API to save the details in the database
       const saveResponse = await axios.post(
         "http://localhost:3000/api/client/save",
         savePayload
@@ -159,7 +194,7 @@ const UploadButton = () => {
 
       if (saveResponse.data.success) {
         console.log("Details saved successfully:", saveResponse.data.data);
-        alert("Document sent for signing and details saved successfully!");
+        alert("Document sent for signing and video generated successfully!");
       } else {
         throw new Error("Failed to save details.");
       }
