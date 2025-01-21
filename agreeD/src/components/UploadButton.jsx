@@ -90,6 +90,7 @@ const UploadButton = () => {
       const { emailContent, structuredDetails } = response.data;
       setEmailContent(emailContent);
       setStructuredDetails(structuredDetails || {});
+      console.log(structuredDetails)
       extractSubjectAndRecipient(emailContent);
       setIsModalOpen(true);
     } catch (error) {
@@ -350,17 +351,79 @@ const UploadButton = () => {
                         })
                       }
                     />
-                    <label>Important Dates:</label>
-                    <textarea
-                      rows="3"
-                      value={structuredDetails.dates || ""}
-                      onChange={(e) =>
+                    <label>Dates</label>
+                    {structuredDetails.dates &&
+                      structuredDetails.dates.map(
+                        (dateObj, index) => (
+                          <div
+                            key={`date-${index}`}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column", // Change to column layout
+                              marginBottom: "20px", // Optional for spacing between groups
+                            }}
+                          >
+                            <input
+                              type="text"
+                              placeholder="Date"
+                              value={dateObj.dateFormat}
+                              onChange={(e) => {
+                                const updatedDates = [
+                                  ...structuredDetails.dates,
+                                ];
+                                updatedDates[index].dateFormat = e.target.value;
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  dates: updatedDates,
+                                });
+                              }}
+                            />
+                            <input
+                              type="text"
+                              placeholder="Type"
+                              value={dateObj.dateType}
+                              onChange={(e) => {
+                                const updatedDates = [
+                                  ...structuredDetails.dates,
+                                ];
+                                updatedDates[index].dateType = e.target.value;
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  dates: updatedDates,
+                                });
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                const updatedDates =
+                                  structuredDetails.dates.filter(
+                                    (_, i) => i !== index
+                                  );
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  dates: updatedDates,
+                                });
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        )
+                      )}
+                    <button
+                      onClick={() =>
                         setStructuredDetails({
                           ...structuredDetails,
-                          dates: e.target.value,
+                          dates: [
+                            ...(structuredDetails.dates || []),
+                            { date: "", type: "" },
+                          ],
                         })
                       }
-                    />
+                    >
+                      Add Email
+                    </button>
+
                     <label>Address:</label>
                     <input
                       type="text"

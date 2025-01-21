@@ -3,6 +3,7 @@ import "./App.css";
 import UploadButton from "./components/UploadButton";
 import Navbar from "./components/Navbar";
 import PdfPreview from "./components/Template";
+import Dashboard from "./components/Dashboard";
 
 function App() {
   // State to track the selected page
@@ -19,6 +20,7 @@ function App() {
       <div className="content">
         {selectedPage === "home" && <UploadButton />}
         {selectedPage === "templates" && <PdfPreview />}
+        {selectedPage === "dashboard" && <Dashboard />}
       </div>
     </div>
   );
