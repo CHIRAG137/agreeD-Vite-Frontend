@@ -1,6 +1,6 @@
 import React from "react";
-import HeroSection from "./sections/HeroSection";
-import Footer from "./footer/Footer";
+import HeroSection from "../components/HomePage/sections/HeroSection";
+import Footer from "../components/HomePage/footer/Footer";
 
 const HomePage = () => {
   return (

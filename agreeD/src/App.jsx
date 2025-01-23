@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import UploadButton from "./components/UploadButton";
-import PdfPreview from "./components/Template";
-import Dashboard from "./components/Dashboard";
+import HomePage from "./pages/HomePage";
+import PdfPreview from "./pages/Template";
 import ContractDetails from "./components/contractDetails/ContractDetails";
-import HomePage from "./components/HomePage/HomePage";
+import Dashboard from "./pages/Dashboard";
 import Navbar from "./components/navbar/Navbar";
 
 function App() {

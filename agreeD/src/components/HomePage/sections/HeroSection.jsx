@@ -1,6 +1,6 @@
 import React from "react";
 import "./HeroSection.css";
-import UploadButton from "../../UploadButton";
+import UploadButton from "../UploadButton";
 
 const HeroSection = () => {
   return (
