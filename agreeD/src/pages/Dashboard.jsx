@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Dashboard.css";
+import Tooltip from "../components/global/tooltip/Tooltip";
+import { truncateWithDots } from "../utils/truncateWithDots";
 
 const Dashboard = ({ handlePageChange }) => {
   const [clientData, setClientData] = useState([]);
@@ -58,11 +60,42 @@ const Dashboard = ({ handlePageChange }) => {
                   </a>
                 </td>
                 <td>{client.contactPerson}</td>
-                {/* <td>{client.dates}</td> */}
-                <td>{client.address}</td>
+                <td>
+                  <div style={{ cursor: "pointer" }}>
+                    {client.dates.length > 0 ? (
+                      <Tooltip
+                        content={
+                          <div>
+                            {client.dates.map((date, index) => (
+                              <div key={index} style={{ display: "flex", gap: "10px" }}>
+                                <div style={{ fontWeight: "bold" }}>{date.dateType}:</div>
+                                <div>{date.dateFormat}</div>
+                              </div>
+                            ))}
+                          </div>
+                        }
+                        direction="right"
+                      >
+                        <span style={{ marginRight: "3px" }}>[{client.dates.length}]</span>
+                        <span>{client.dates.length > 1 ? "Dates" : "Date"}</span>
+                      </Tooltip>
+                    ) : (
+                      "No Dates"
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <Tooltip content={client.address} direction="bottom">
+                    <span>{truncateWithDots(client.address, 25)}</span>
+                  </Tooltip>
+                </td>
                 <td>{client.cost}</td>
                 {/* <td>{client.emailContent}</td> */}
-                <td>{client.subject}</td>
+                <td>
+                  <Tooltip content={client.subject} direction="bottom">
+                    <span>{truncateWithDots(client.subject, 35)}</span>
+                  </Tooltip>
+                </td>
                 <td>{client.recipientEmail}</td>
                 <td>
                   <a href={client.heygenVideoLink} target="_blank" rel="noopener noreferrer">
