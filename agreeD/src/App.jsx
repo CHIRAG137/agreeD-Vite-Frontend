@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import UploadButton from "./components/UploadButton";
-import Navbar from "./components/Navbar";
 import PdfPreview from "./components/Template";
 import Dashboard from "./components/Dashboard";
+import ContractDetails from "./components/contractDetails/ContractDetails";
+import HomePage from "./components/HomePage/HomePage";
+import Navbar from "./components/navbar/Navbar";
 
 function App() {
   // State to track the selected page
@@ -15,14 +17,19 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <>
       <Navbar onPageChange={handlePageChange} />
-      <div className="content">
-        {selectedPage === "home" && <UploadButton />}
-        {selectedPage === "templates" && <PdfPreview />}
-        {selectedPage === "dashboard" && <Dashboard />}
+      <div className="app">
+        <div className="content" style={{ width: "100%" }}>
+          {selectedPage === "home" && <HomePage />}
+          {selectedPage === "templates" && <PdfPreview />}
+          {selectedPage === "dashboard" && <Dashboard handlePageChange={handlePageChange} />}
+          {selectedPage.includes("contract-details") && (
+            <ContractDetails selectedPage={selectedPage} onPageChange={handlePageChange} />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

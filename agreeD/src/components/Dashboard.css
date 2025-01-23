@@ -1,45 +1,72 @@
 .dashboard {
-    padding: 20px;
-  }
-  
-  .table-container {
-    max-height: 500px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-  }
-  
-  table {
-    min-width: 1200px;
-    border-collapse: collapse;
-    table-layout: fixed; /* Ensures fixed-width columns */
-  }
-  
-  th, td {
-    padding: 10px;
-    text-align: left;
-    border: 1px solid #ddd;
-    word-wrap: break-word; /* Prevents overflowing text */
-    color: black;
-    font-size: 14px;
-  }
-  
-  th {
-    background-color: #f4f4f4;
-    color: black
-  }
-  
-  tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  /* Define specific column widths */
-  th:nth-child(1), td:nth-child(1) { width: 150px; } /* Client Name */
-  th:nth-child(2), td:nth-child(2) { width: 150px; } /* Contact Person */
-  th:nth-child(3), td:nth-child(3) { width: 150px; } /* Dates */
-  th:nth-child(4), td:nth-child(4) { width: 300px; } /* Address */
-  th:nth-child(5), td:nth-child(5) { width: 100px; } /* Cost */
-  th:nth-child(6), td:nth-child(6) { width: 400px; } /* Email Content */
-  th:nth-child(7), td:nth-child(7) { width: 300px; } /* Subject */
-  th:nth-child(8), td:nth-child(8) { width: 200px; } /* Recipient Email */
-  th:nth-child(9), td:nth-child(9) { width: 200px; } /* Heygen Video Link */
-  
+  padding: 20px;
+}
+
+.table-container {
+  max-height: 450px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+}
+
+table {
+  min-width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensures fixed-width columns */
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+  word-wrap: break-word; /* Prevents overflowing text */
+  color: black;
+  font-size: 14px;
+}
+
+th {
+  background-color: #f4f4f4;
+  color: black;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Define specific column widths */
+th:nth-child(1),
+td:nth-child(1) {
+  width: 150px;
+} /* Client Name */
+th:nth-child(2),
+td:nth-child(2) {
+  width: 150px;
+} /* Contact Person */
+th:nth-child(3),
+td:nth-child(3) {
+  width: 150px;
+} /* Dates */
+th:nth-child(4),
+td:nth-child(4) {
+  width: 300px;
+} /* Address */
+th:nth-child(5),
+td:nth-child(5) {
+  width: 100px;
+} /* Cost */
+th:nth-child(6),
+td:nth-child(6) {
+  width: 400px;
+} /* Email Content */
+th:nth-child(7),
+td:nth-child(7) {
+  width: 300px;
+} /* Subject */
+th:nth-child(8),
+td:nth-child(8) {
+  width: 200px;
+} /* Recipient Email */
+th:nth-child(9),
+td:nth-child(9) {
+  width: 200px;
+} /* Heygen Video Link */

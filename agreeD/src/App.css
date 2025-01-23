@@ -1,6 +1,4 @@
 #root {
-  text-align: center;
-  background-color: white;
   height: 100vh;
   width: 100vw;
 }
@@ -9,33 +7,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 60px; 
+  padding-top: 60px;
   margin: 0;
-}
-
-.upload-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  position: relative;
-}
-
-.upload-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.upload-button:hover {
-  background-color: #45a049;
 }
 
 .loading {
   margin-top: 10px;
-  color: #007BFF;
+  color: #007bff;
 }
 
 .modal {
@@ -65,38 +43,38 @@
 }
 
 textarea::-webkit-scrollbar {
-  width: 8px; 
-  height: 8px; 
+  width: 8px;
+  height: 8px;
 }
 
 textarea::-webkit-scrollbar-thumb {
-  background-color: grey;  
-  border-radius: 10px;         
+  background-color: grey;
+  border-radius: 10px;
   transition: background-color 0.3s;
 }
 
 textarea::-webkit-scrollbar-thumb:hover {
-  background-color: grey; 
+  background-color: grey;
 }
 
 textarea::-webkit-scrollbar-track {
-  background-color: #f1f1f1;  
+  background-color: #f1f1f1;
   border-radius: 10px;
 }
 
 textarea::-webkit-scrollbar-track:hover {
-  background-color: #e0e0e0; 
+  background-color: #e0e0e0;
 }
 
 textarea:focus {
   border-color: grey;
-  outline: none; 
+  outline: none;
 }
 
 .modal input[type="email"]:focus,
 .modal input[type="text"]:focus,
 .modal textarea:focus {
-  border-color: #4CAF50;
+  border-color: #4caf50;
   outline: none;
 }
 
@@ -157,7 +135,7 @@ input[type="text"] {
 textarea:focus,
 input[type="email"]:focus,
 input[type="text"]:focus {
-  border-color: #4CAF50;
+  border-color: #4caf50;
   outline: none;
 }
 
@@ -170,40 +148,6 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-}
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: #333;
-  padding: 0px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 1000; 
-}
-
-.navbar ul {
-  list-style-type: none;
-  display: flex;
-  margin: 0;
-  padding: 0;
-}
-
-.navbar li {
-  margin-right: 20px;
-}
-
-.navbar a {
-  color: white;
-  text-decoration: none;
-  padding: 10px 15px;
-}
-
-.navbar a:hover {
-  background-color: #575757;
-  border-radius: 5px;
 }
 
 .modal-actions {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Dashboard.css";
 
-const Dashboard = () => {
+const Dashboard = ({ handlePageChange }) => {
   const [clientData, setClientData] = useState([]);
 
   useEffect(() => {
@@ -25,8 +25,8 @@ const Dashboard = () => {
       <div className="table-container">
         <table>
           <thead>
-            <tr>
-              <th>Client Name</th>
+            <tr style={{ position: "sticky", left: "0", top: "-2px", zIndex: 2 }}>
+              <th style={{ position: "sticky", left: "-1px" }}>Client Name</th>
               <th>Contact Person</th>
               <th>Dates</th>
               <th>Address</th>
@@ -38,17 +38,37 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {clientData.map((client) => (
+            {clientData.map((client, index) => (
               <tr key={client._id}>
-                <td>{client.clientName}</td>
+                <td
+                  style={{
+                    position: "sticky",
+                    left: "-1px",
+                    zIndex: 1,
+                    backgroundColor: index % 2 !== 0 ? "#f9f9f9" : "#fff",
+                  }}
+                >
+                  <a
+                    href={`#contract-details/${"678fc9eed4e62fc6505bedce"}`}
+                    onClick={() =>
+                      handlePageChange(`contract-details/${"678fc9eed4e62fc6505bedce"}`)
+                    }
+                  >
+                    {client.clientName}
+                  </a>
+                </td>
                 <td>{client.contactPerson}</td>
-                <td>{client.dates}</td>
+                {/* <td>{client.dates}</td> */}
                 <td>{client.address}</td>
                 <td>{client.cost}</td>
                 {/* <td>{client.emailContent}</td> */}
                 <td>{client.subject}</td>
                 <td>{client.recipientEmail}</td>
-                <td><a href={client.heygenVideoLink} target="_blank" rel="noopener noreferrer">Video</a></td>
+                <td>
+                  <a href={client.heygenVideoLink} target="_blank" rel="noopener noreferrer">
+                    Video
+                  </a>
+                </td>
               </tr>
             ))}
           </tbody>
