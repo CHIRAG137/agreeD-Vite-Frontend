@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Chatbot from "../global/Chatbot";
 
 const UploadButton = () => {
   const [file, setFile] = useState(null);
@@ -49,9 +50,7 @@ const UploadButton = () => {
     // Fetch templates when the component mounts
     const fetchTemplates = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/docusign/fetch-templates"
-        );
+        const response = await axios.get("http://localhost:3000/api/docusign/fetch-templates");
         setTemplates(response.data.templates); // Adjust based on the API response structure
       } catch (error) {
         console.error("Error fetching templates:", error);
@@ -76,13 +75,9 @@ const UploadButton = () => {
 
     try {
       setIsLoading(true);
-      const response = await axios.post(
-        "http://localhost:3000/api/upload",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const response = await axios.post("http://localhost:3000/api/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       const filePath = response.data.filePath;
       localStorage.setItem("uploadedFilePath", filePath);
@@ -90,7 +85,7 @@ const UploadButton = () => {
       const { emailContent, structuredDetails } = response.data;
       setEmailContent(emailContent);
       setStructuredDetails(structuredDetails || {});
-      console.log(structuredDetails)
+      console.log(structuredDetails);
       extractSubjectAndRecipient(emailContent);
       setIsModalOpen(true);
     } catch (error) {
@@ -188,10 +183,7 @@ const UploadButton = () => {
       };
 
       // Step 6: Call the API to save the details in the database
-      const saveResponse = await axios.post(
-        "http://localhost:3000/api/client/save",
-        savePayload
-      );
+      const saveResponse = await axios.post("http://localhost:3000/api/client/save", savePayload);
 
       if (saveResponse.data.success) {
         console.log("Details saved successfully:", saveResponse.data.data);
@@ -258,10 +250,10 @@ const UploadButton = () => {
 
   return (
     <div className="upload-container">
-      <div className="button-group">
+      <div className="ctaButtons">
         {!showTemplateDropdown && (
           <>
-            <label htmlFor="upload" className="upload-button">
+            <label htmlFor="upload" className="ctaBtn">
               Upload Document
             </label>
             <input
@@ -271,10 +263,7 @@ const UploadButton = () => {
               onChange={handleUpload}
               accept=".pdf,.docx"
             />
-            <button
-              onClick={() => setShowTemplateDropdown(true)}
-              className="upload-button"
-            >
+            <button onClick={() => setShowTemplateDropdown(true)} className="ctaBtn">
               Use Template
             </button>
           </>
@@ -322,6 +311,8 @@ const UploadButton = () => {
         </div>
       )}
 
+      {isModalOpen && <Chatbot style={{ zIndex: "9999" }} />}
+
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
@@ -352,15 +343,28 @@ const UploadButton = () => {
                       }
                     />
                     <label>Dates</label>
-                    {structuredDetails.dates &&
-                      structuredDetails.dates.map(
-                        (dateObj, index) => (
+                    <div
+                      style={{
+                        borderRadius: "5px",
+                        border: "1px solid #ccc",
+                        padding: "10px",
+                        marginBottom: "20px",
+                        borderLeft: "3px solid red",
+                      }}
+                    >
+                      {structuredDetails.dates &&
+                        structuredDetails.dates.map((dateObj, index) => (
                           <div
                             key={`date-${index}`}
                             style={{
                               display: "flex",
                               flexDirection: "column", // Change to column layout
                               marginBottom: "20px", // Optional for spacing between groups
+                              paddingBottom: "10px",
+                              borderBottom:
+                                index === structuredDetails.dates.length - 1
+                                  ? "none"
+                                  : "1px solid #ccc",
                             }}
                           >
                             <input
@@ -368,9 +372,7 @@ const UploadButton = () => {
                               placeholder="Date"
                               value={dateObj.dateFormat}
                               onChange={(e) => {
-                                const updatedDates = [
-                                  ...structuredDetails.dates,
-                                ];
+                                const updatedDates = [...structuredDetails.dates];
                                 updatedDates[index].dateFormat = e.target.value;
                                 setStructuredDetails({
                                   ...structuredDetails,
@@ -383,9 +385,7 @@ const UploadButton = () => {
                               placeholder="Type"
                               value={dateObj.dateType}
                               onChange={(e) => {
-                                const updatedDates = [
-                                  ...structuredDetails.dates,
-                                ];
+                                const updatedDates = [...structuredDetails.dates];
                                 updatedDates[index].dateType = e.target.value;
                                 setStructuredDetails({
                                   ...structuredDetails,
@@ -395,10 +395,9 @@ const UploadButton = () => {
                             />
                             <button
                               onClick={() => {
-                                const updatedDates =
-                                  structuredDetails.dates.filter(
-                                    (_, i) => i !== index
-                                  );
+                                const updatedDates = structuredDetails.dates.filter(
+                                  (_, i) => i !== index
+                                );
                                 setStructuredDetails({
                                   ...structuredDetails,
                                   dates: updatedDates,
@@ -408,21 +407,18 @@ const UploadButton = () => {
                               Remove
                             </button>
                           </div>
-                        )
-                      )}
-                    <button
-                      onClick={() =>
-                        setStructuredDetails({
-                          ...structuredDetails,
-                          dates: [
-                            ...(structuredDetails.dates || []),
-                            { date: "", type: "" },
-                          ],
-                        })
-                      }
-                    >
-                      Add Email
-                    </button>
+                        ))}
+                      <button
+                        onClick={() =>
+                          setStructuredDetails({
+                            ...structuredDetails,
+                            dates: [...(structuredDetails.dates || []), { date: "", type: "" }],
+                          })
+                        }
+                      >
+                        Add Date
+                      </button>
+                    </div>
 
                     <label>Address:</label>
                     <input
@@ -447,15 +443,28 @@ const UploadButton = () => {
                       }
                     />
                     <label>Emails</label>
-                    {structuredDetails.emailAddresses &&
-                      structuredDetails.emailAddresses.map(
-                        (emailObj, index) => (
+                    <div
+                      style={{
+                        borderRadius: "5px",
+                        border: "1px solid #ccc",
+                        padding: "10px",
+                        marginBottom: "20px",
+                        borderLeft: "3px solid red",
+                      }}
+                    >
+                      {structuredDetails.emailAddresses &&
+                        structuredDetails.emailAddresses.map((emailObj, index) => (
                           <div
                             key={`email-${index}`}
                             style={{
                               display: "flex",
                               flexDirection: "column", // Change to column layout
                               marginBottom: "20px", // Optional for spacing between groups
+                              paddingBottom: "10px",
+                              borderBottom:
+                                index === structuredDetails.emailAddresses.length - 1
+                                  ? "none"
+                                  : "1px solid #ccc",
                             }}
                           >
                             <input
@@ -463,9 +472,7 @@ const UploadButton = () => {
                               placeholder="Name"
                               value={emailObj.entity}
                               onChange={(e) => {
-                                const updatedEmails = [
-                                  ...structuredDetails.emailAddresses,
-                                ];
+                                const updatedEmails = [...structuredDetails.emailAddresses];
                                 updatedEmails[index].entity = e.target.value;
                                 setStructuredDetails({
                                   ...structuredDetails,
@@ -478,9 +485,7 @@ const UploadButton = () => {
                               placeholder="Email"
                               value={emailObj.email}
                               onChange={(e) => {
-                                const updatedEmails = [
-                                  ...structuredDetails.emailAddresses,
-                                ];
+                                const updatedEmails = [...structuredDetails.emailAddresses];
                                 updatedEmails[index].email = e.target.value;
                                 setStructuredDetails({
                                   ...structuredDetails,
@@ -490,10 +495,9 @@ const UploadButton = () => {
                             />
                             <button
                               onClick={() => {
-                                const updatedEmails =
-                                  structuredDetails.emailAddresses.filter(
-                                    (_, i) => i !== index
-                                  );
+                                const updatedEmails = structuredDetails.emailAddresses.filter(
+                                  (_, i) => i !== index
+                                );
                                 setStructuredDetails({
                                   ...structuredDetails,
                                   emailAddresses: updatedEmails,
@@ -503,93 +507,103 @@ const UploadButton = () => {
                               Remove
                             </button>
                           </div>
-                        )
-                      )}
-                    <button
-                      onClick={() =>
-                        setStructuredDetails({
-                          ...structuredDetails,
-                          emailAddresses: [
-                            ...(structuredDetails.emailAddresses || []),
-                            { name: "", email: "" },
-                          ],
-                        })
-                      }
-                    >
-                      Add Email
-                    </button>
+                        ))}
+                      <button
+                        onClick={() =>
+                          setStructuredDetails({
+                            ...structuredDetails,
+                            emailAddresses: [
+                              ...(structuredDetails.emailAddresses || []),
+                              { name: "", email: "" },
+                            ],
+                          })
+                        }
+                      >
+                        Add Email
+                      </button>
+                    </div>
 
                     <label>Phone Numbers</label>
-                    {structuredDetails.phoneNumbers &&
-                      structuredDetails.phoneNumbers.map((phoneObj, index) => (
-                        <div
-                          key={`phone-${index}`}
-                          style={{
-                            display: "flex",
-                            flexDirection: "column", // Change to column layout
-                            gap: "10px",
-                            marginBottom: "20px", // Optional for spacing between groups
-                          }}
-                        >
-                          <input
-                            type="text"
-                            placeholder="Name"
-                            value={phoneObj.entity}
-                            onChange={(e) => {
-                              const updatedPhones = [
-                                ...structuredDetails.phoneNumbers,
-                              ];
-                              updatedPhones[index].entity = e.target.value;
-                              setStructuredDetails({
-                                ...structuredDetails,
-                                phoneNumbers: updatedPhones,
-                              });
-                            }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Phone"
-                            value={phoneObj.phoneNumber}
-                            onChange={(e) => {
-                              const updatedPhones = [
-                                ...structuredDetails.phoneNumbers,
-                              ];
-                              updatedPhones[index].phoneNumber = e.target.value;
-                              setStructuredDetails({
-                                ...structuredDetails,
-                                phoneNumbers: updatedPhones,
-                              });
-                            }}
-                          />
-                          <button
-                            onClick={() => {
-                              const updatedPhones =
-                                structuredDetails.phoneNumbers.filter(
-                                  (_, i) => i !== index
-                                );
-                              setStructuredDetails({
-                                ...structuredDetails,
-                                phoneNumbers: updatedPhones,
-                              });
+                    <div
+                      style={{
+                        borderRadius: "5px",
+                        border: "1px solid #ccc",
+                        padding: "10px",
+                        marginBottom: "20px",
+                        borderLeft: "3px solid red",
+                      }}
+                    >
+                      {structuredDetails.phoneNumbers &&
+                        structuredDetails.phoneNumbers.map((phoneObj, index) => (
+                          <div
+                            key={`phone-${index}`}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column", // Change to column layout
+                              gap: "10px",
+                              marginBottom: "20px", // Optional for spacing between groups
+                              paddingBottom: "10px",
+                              borderBottom:
+                                index === structuredDetails.phoneNumbers.length - 1
+                                  ? "none"
+                                  : "1px solid #ccc",
                             }}
                           >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
-                    <button
-                      onClick={() =>
-                        setStructuredDetails({
-                          ...structuredDetails,
-                          phoneNumbers: [
-                            ...(structuredDetails.phoneNumbers || []),
-                            { name: "", phone: "" },
-                          ],
-                        })
-                      }
-                    >
-                      Add Phone Number
-                    </button>
+                            <input
+                              type="text"
+                              placeholder="Name"
+                              value={phoneObj.entity}
+                              onChange={(e) => {
+                                const updatedPhones = [...structuredDetails.phoneNumbers];
+                                updatedPhones[index].entity = e.target.value;
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  phoneNumbers: updatedPhones,
+                                });
+                              }}
+                            />
+                            <input
+                              type="text"
+                              placeholder="Phone"
+                              value={phoneObj.phoneNumber}
+                              onChange={(e) => {
+                                const updatedPhones = [...structuredDetails.phoneNumbers];
+                                updatedPhones[index].phoneNumber = e.target.value;
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  phoneNumbers: updatedPhones,
+                                });
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                const updatedPhones = structuredDetails.phoneNumbers.filter(
+                                  (_, i) => i !== index
+                                );
+                                setStructuredDetails({
+                                  ...structuredDetails,
+                                  phoneNumbers: updatedPhones,
+                                });
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      <button
+                        onClick={() =>
+                          setStructuredDetails({
+                            ...structuredDetails,
+                            phoneNumbers: [
+                              ...(structuredDetails.phoneNumbers || []),
+                              { name: "", phone: "" },
+                            ],
+                          })
+                        }
+                      >
+                        Add Phone Number
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
@@ -625,9 +639,7 @@ const UploadButton = () => {
 
                 <div className="modal-actions">
                   <button onClick={closeModal}>Close</button>
-                  <button onClick={sendDocumentForSigning}>
-                    Send without Video
-                  </button>
+                  <button onClick={sendDocumentForSigning}>Send without Video</button>
                   <button onClick={sendWithVideo}>Generate Video</button>
                 </div>
               </div>

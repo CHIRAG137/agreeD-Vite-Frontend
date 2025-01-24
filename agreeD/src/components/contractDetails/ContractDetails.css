@@ -1,0 +1,31 @@
+.contract-details-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100vh - 80px);
+  box-sizing: border-box;
+}
+
+.middle-panel,
+.right-panel,
+.left-panel {
+  padding-top: 20px;
+  height: 100%;
+}
+
+.middle-panel {
+  background-color: #f5f8fa;
+  flex: 2;
+  border-left: #d6d2d2 5px solid;
+  border-right: #d6d2d2 5px solid;
+}
+
+.right-panel,
+.left-panel {
+  /* background-color: bisque; */
+  flex: 1;
+}
+
+.active-tab {
+  border-bottom: 2px solid #000000;
+}
