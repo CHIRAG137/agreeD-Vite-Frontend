@@ -4,7 +4,7 @@ import "./Navbar.css";
 const Navbar = ({ onPageChange }) => {
   return (
     <header className="navbar">
-      <div className="logo">OpenAI</div>
+      <div className="logo">AgreeD</div>
       <nav>
         <a href="#home" onClick={() => onPageChange("home")} className="navLink">
           Home
