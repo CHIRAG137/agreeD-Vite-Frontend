@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
+import DragDropFile from "../components/TemplatePage/DragDropFile";
 
 const PdfPreview = () => {
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(null);
-  const [selectedTab, setSelectedTab] = useState(null);  // Track selected tab
-  const [coords, setCoords] = useState({ x: 0, y: 0 });  // Store clicked coordinates
-  const [showModal, setShowModal] = useState(false);  // For modal visibility
+  const [selectedTab, setSelectedTab] = useState(null); // Track selected tab
+  const [coords, setCoords] = useState({ x: 0, y: 0 }); // Store clicked coordinates
+  const [showModal, setShowModal] = useState(false); // For modal visibility
   const [tabDetails, setTabDetails] = useState({}); // Store the filled details for the tab
-  const [pageNumber, setPageNumber] = useState(1);  // Track the page number
+  const [pageNumber, setPageNumber] = useState(1); // Track the page number
 
   // Handle file upload
-  const handleFileUpload = (event) => {
-    const uploadedFile = event.target.files[0];
+  const handleFileUpload = (uploadedFile) => {
+    // const uploadedFile = event.target.files[0];
     if (uploadedFile && uploadedFile.type === "application/pdf") {
       setFile(uploadedFile);
       const url = URL.createObjectURL(uploadedFile);
@@ -27,8 +28,7 @@ const PdfPreview = () => {
   // Handle tab selection
   const handleTabClick = (tab) => {
     setSelectedTab(tab);
-    setShowModal(true); // Show modal when a tab is selected
-    setTabDetails({});  // Reset tab details for a new tab selection
+    setTabDetails({}); // Reset tab details for a new tab selection
   };
 
   // Handle click on the PDF preview to get coordinates
@@ -36,8 +36,9 @@ const PdfPreview = () => {
     if (selectedTab) {
       const rect = event.target.getBoundingClientRect();
       const x = event.clientX - rect.left; // X coordinate relative to the document
-      const y = event.clientY - rect.top;  // Y coordinate relative to the document
+      const y = event.clientY - rect.top; // Y coordinate relative to the document
       setCoords({ x, y });
+      setShowModal(true); // Show modal when a tab is selected
     }
   };
 
@@ -55,6 +56,7 @@ const PdfPreview = () => {
     // Store or send tab data to backend as needed
     console.log("Saved tab at:", coords, tabDetails);
     setShowModal(false); // Close the modal after saving
+    setSelectedTab(null); // Deselect the tab after saving
   };
 
   // Handle page number change
@@ -101,7 +103,9 @@ const PdfPreview = () => {
               type="checkbox"
               name="required"
               checked={tabDetails.required || false}
-              onChange={(e) => handleInputChange({ target: { name: "required", value: e.target.checked } })}
+              onChange={(e) =>
+                handleInputChange({ target: { name: "required", value: e.target.checked } })
+              }
             />
           </>
         );
@@ -129,7 +133,7 @@ const PdfPreview = () => {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "100vh",
+    minHeight: "calc(100vh - 100px)",
     padding: "16px",
   };
 
@@ -154,7 +158,7 @@ const PdfPreview = () => {
 
   const previewContainerStyle = {
     width: "100%",
-    height: "800px",
+    height: "calc(100vh - 150px)",
     overflow: "hidden",
     backgroundColor: "#f1f5f9",
     borderRadius: "8px",
@@ -169,11 +173,10 @@ const PdfPreview = () => {
 
   const tabRowStyle = {
     display: "flex",
-    justifyContent: "space-around",
+    flexDirection: "column",
+    justifyContent: "space-between",
     alignItems: "center",
-    flexWrap: "wrap",
-    marginBottom: "16px",
-    gap: "8px",
+    gap: "7px",
   };
 
   const tabButtonStyle = {
@@ -182,10 +185,10 @@ const PdfPreview = () => {
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#e5e7eb",
-    padding: "10px",
+    padding: "8px",
     borderRadius: "8px",
     cursor: "pointer",
-    width: "120px",
+    width: "140px",
     textAlign: "center",
     boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
   };
@@ -214,57 +217,102 @@ const PdfPreview = () => {
 
   return (
     <div style={containerStyle}>
-      <input
-        type="number"
-        value={pageNumber}
-        onChange={handlePageNumberChange}
-        style={{ marginBottom: "16px", padding: "8px", width: "60px" }}
-        min={1}
-        max={1000}
-        placeholder="Page #"
-      />
-      <div style={tabRowStyle}>
-        {tabData.map((tab, index) => (
-          <div
-            key={index}
-            style={selectedTab === tab ? selectedTabButtonStyle : tabButtonStyle}
-            onClick={() => handleTabClick(tab)}
-          >
-            <div style={logoStyle}>{tab.logo}</div>
-            <div>{tab.name}</div>
-          </div>
-        ))}
-      </div>
       {!file ? (
-        <div style={{ textAlign: "center" }}>
-          <input
-            type="file"
-            accept=".pdf"
-            onChange={handleFileUpload}
-            style={{ display: "none" }}
-            id="pdf-upload"
-          />
-          <button onClick={handleButtonClick} style={buttonStyle}>
-            Upload PDF
-          </button>
-        </div>
+        <DragDropFile handleFileUpload={handleFileUpload} />
       ) : (
-        <div style={cardStyle}>
-          <div style={previewContainerStyle} onClick={handleClickOnPdf}>
-            <object data={fileUrl} type="application/pdf" style={objectStyle}>
-              <embed src={fileUrl} type="application/pdf" style={objectStyle} />
-            </object>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "16px",
+            width: "100%",
+          }}
+        >
+          <div style={{ ...cardStyle, maxWidth: "1600px", marginRight: "250px" }}>
+            <div
+              style={previewContainerStyle}
+              onClick={handleClickOnPdf} // Verify this matches your function name exactly
+            >
+              <object data={fileUrl} type="application/pdf" style={objectStyle}>
+                <embed src={fileUrl} type="application/pdf" style={objectStyle} />
+              </object>
+            </div>
+          </div>
+          <div
+            style={{
+              ...cardStyle,
+              position: "fixed",
+              bottom: "4%",
+              top: "12%",
+              right: 0,
+              width: "200px",
+              overflowY: "auto",
+            }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <label htmlFor="pageNumber">Page Number:</label>
+              <input
+                id="pageNumber"
+                type="number"
+                value={pageNumber}
+                onChange={handlePageNumberChange}
+                style={{ marginBottom: "16px", padding: "8px 4px", width: "40px" }}
+                min={1}
+                max={1000}
+                placeholder="Page #"
+              />
+            </div>
+            <div style={{ ...tabRowStyle }}>
+              {tabData.map((tab, index) => (
+                <div
+                  key={index}
+                  style={selectedTab?.name === tab.name ? selectedTabButtonStyle : tabButtonStyle}
+                  onClick={() => handleTabClick(tab)}
+                >
+                  <div style={logoStyle}>{tab.logo}</div>
+                  <div>{tab.name}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
       {showModal && (
-        <div className="modal" style={{ position: "fixed", top: "0", left: "0", right: "0", bottom: "0", background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <div
+          className="modal"
+          style={{
+            position: "fixed",
+            top: "0",
+            left: "0",
+            right: "0",
+            bottom: "0",
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <div style={{ padding: "20px", backgroundColor: "#fff", borderRadius: "8px" }}>
             <h3>{selectedTab?.name}</h3>
-            <p>Coordinates: X: {coords.x}, Y: {coords.y}</p>
+            <p>
+              Coordinates: X: {coords.x}, Y: {coords.y}
+            </p>
             {renderTabFields()}
-            <button onClick={handleSave} style={{ backgroundColor: "#4CAF50", padding: "10px 20px", color: "white", borderRadius: "5px", cursor: "pointer" }}>Save</button>
+            <button
+              onClick={handleSave}
+              style={{
+                backgroundColor: "#4CAF50",
+                padding: "10px 20px",
+                color: "white",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+            >
+              Save
+            </button>
           </div>
         </div>
       )}
