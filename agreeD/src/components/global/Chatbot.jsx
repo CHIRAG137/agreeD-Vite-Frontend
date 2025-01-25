@@ -28,6 +28,9 @@ const Chatbot = ({ style, pdfText }) => {
   };
 
   const handleSendMessage = async () => {
+    if (isLoading) {
+      return;
+    }
     if (input.trim() !== "") {
       setMessages((prev) => [...prev, { role: "user", text: input }]);
       setIsLoading(true);
