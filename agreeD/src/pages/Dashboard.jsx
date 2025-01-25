@@ -47,7 +47,6 @@ const Dashboard = ({ handlePageChange }) => {
                     position: "sticky",
                     left: "-1px",
                     zIndex: 1,
-                    backgroundColor: index % 2 !== 0 ? "#f9f9f9" : "#fff",
                   }}
                 >
                   <a

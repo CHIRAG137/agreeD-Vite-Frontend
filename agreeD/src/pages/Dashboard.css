@@ -1,11 +1,14 @@
 .dashboard {
   padding: 20px;
+  background-color: #171717;
+  color: #f5f8fa;
+  height: calc(100vh - 100px);
 }
 
 .table-container {
   max-height: 450px;
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 1px solid #313131;
 }
 
 table {
@@ -18,19 +21,27 @@ th,
 td {
   padding: 10px;
   text-align: left;
-  border: 1px solid #ddd;
+  border: 1px solid #313131;
   word-wrap: break-word; /* Prevents overflowing text */
-  color: black;
   font-size: 14px;
+  color: #f5f8fa;
 }
 
 th {
-  background-color: #f4f4f4;
-  color: black;
+  background-color: #212122;
+  color: #f5f8fa;
 }
 
-tr:nth-child(even) {
-  background-color: #f9f9f9;
+td a {
+  color: orange;
+  cursor: pointer;
+}
+td a:hover {
+  color: orangered;
+}
+
+tr:hover {
+  background-color: #313131;
 }
 
 /* Define specific column widths */
