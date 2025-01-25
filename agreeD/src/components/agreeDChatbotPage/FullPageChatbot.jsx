@@ -3,6 +3,7 @@ import { FiSend } from "react-icons/fi";
 import axios from "axios";
 import Modal from "../global/Modal";
 import NotFoundPage from "../../pages/NotFoundPage";
+import HeygenVideoChatbot from "./HeygenVideoChatbot";
 
 const FullPageChatbot = () => {
   const [messages, setMessages] = useState([
@@ -131,7 +132,9 @@ const FullPageChatbot = () => {
           >
             Video Assistant
           </h2>
-          <div>hello</div>
+          <div>
+            <HeygenVideoChatbot documentDetails={documentDetails} />
+          </div>
         </Modal>
       )}
 
