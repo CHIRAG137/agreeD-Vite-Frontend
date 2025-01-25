@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiSend } from "react-icons/fi";
+import axios from "axios";
+import Modal from "../global/Modal";
+import NotFoundPage from "../../pages/NotFoundPage";
 
-const ChatUI = () => {
+const FullPageChatbot = () => {
   const [messages, setMessages] = useState([
     {
       role: "bot",
@@ -10,7 +13,18 @@ const ChatUI = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDataFetchingLoading, setIsDataFetchingLoading] = useState(false);
   const chatEndRef = useRef(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [isVideoAssistantModalOpen, setIsVideoAssistantModalOpen] = useState(false);
+  const [documentDetails, setDocumentDetails] = useState({});
+  const [isError, setIsError] = useState(false);
+
+  const openVideoModal = () => setIsVideoModalOpen(true);
+  const closeVideoModal = () => setIsVideoModalOpen(false);
+
+  const openVideoAssistantModal = () => setIsVideoAssistantModalOpen(true);
+  const closeVideoAssistantModal = () => setIsVideoAssistantModalOpen(false);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -19,6 +33,35 @@ const ChatUI = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
+
+  useEffect(() => {
+    const fetchDocumentDetails = async () => {
+      try {
+        setIsDataFetchingLoading(true);
+        const response = await fetch(
+          `http://localhost:3000/api/client/${window.location.pathname.split("/")[2]}`
+        );
+        const data = await response.json();
+        console.log(data);
+        setDocumentDetails(data);
+        setIsDataFetchingLoading(false);
+      } catch (error) {
+        console.error("Error fetching client data:", error);
+        setIsError(true);
+        setIsDataFetchingLoading(false);
+      }
+    };
+
+    fetchDocumentDetails();
+  }, []);
+
+  if (isError) {
+    return <NotFoundPage />;
+  }
+
+  if (isDataFetchingLoading) {
+    return <div>Loading...</div>;
+  }
 
   const handleSendMessage = async () => {
     if (isLoading) {
@@ -29,14 +72,12 @@ const ChatUI = () => {
       setMessages((prev) => [...prev, { role: "user", text: input }]);
       setIsLoading(true);
 
-      // const response = await axios.post("http://localhost:3000/api/chatbot/ask", {
-      //   pdfText,
-      //   question: input,
-      // });
+      const response = await axios.post("http://localhost:3000/api/chatbot/ask", {
+        pdfText: documentDetails.emailContent,
+        question: input,
+      });
 
-      setTimeout(() => {
-        setMessages((prev) => [...prev, { role: "bot", text: "bot response" }]);
-      }, 1000);
+      setMessages((prev) => [...prev, { role: "bot", text: response.data.answer }]);
 
       setInput("");
       setIsLoading(false);
@@ -54,6 +95,46 @@ const ChatUI = () => {
         flexDirection: "column",
       }}
     >
+      {isVideoModalOpen && (
+        <Modal isOpen={isVideoModalOpen} onClose={closeVideoModal} style={{ width: "1000px" }}>
+          <h2
+            style={{
+              padding: "0 0 10px",
+              margin: "0",
+              textAlign: "center",
+              borderBottom: "1px solid #333",
+            }}
+          >
+            Document Explanation Video
+          </h2>
+          <video
+            style={{ width: "100%", height: "auto" }}
+            src={`https://resource2.heygen.ai/video/${documentDetails.heygenVideoId}/1280x720.mp4`}
+            controls
+          ></video>
+        </Modal>
+      )}
+
+      {isVideoAssistantModalOpen && (
+        <Modal
+          isOpen={isVideoAssistantModalOpen}
+          onClose={closeVideoAssistantModal}
+          style={{ width: "500px" }}
+        >
+          <h2
+            style={{
+              padding: "0 0 10px",
+              margin: "0",
+              textAlign: "center",
+              borderBottom: "1px solid #333",
+            }}
+          >
+            Video Assistant
+          </h2>
+          <div>hello</div>
+        </Modal>
+      )}
+
       {/* Header */}
       <div
         style={{
@@ -75,6 +156,7 @@ const ChatUI = () => {
               cursor: "pointer",
               outline: "none",
             }}
+            onClick={openVideoAssistantModal}
           >
             Open Video Assistant
           </button>
@@ -87,6 +169,7 @@ const ChatUI = () => {
               cursor: "pointer",
               outline: "none",
             }}
+            onClick={openVideoModal}
           >
             Open Ai Video
           </button>
@@ -204,4 +287,4 @@ const ChatUI = () => {
   );
 };
 
-export default ChatUI;
+export default FullPageChatbot;
