@@ -47,7 +47,7 @@ const DragDropFile = ({ handleFileUpload }) => {
   };
 
   const uploadMessageStyle = {
-    color: "#fff",
+    color: "#ececec",
     fontSize: "16px",
     height: "100%",
     display: "flex",
@@ -60,7 +60,7 @@ const DragDropFile = ({ handleFileUpload }) => {
     marginTop: "10px",
     padding: "8px 16px",
     backgroundColor: "orange",
-    color: "#fff",
+    color: "#ececec",
     border: "none",
     borderRadius: "4px",
     fontSize: "14px",

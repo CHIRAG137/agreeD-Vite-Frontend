@@ -52,7 +52,7 @@ const Chatbot = ({ style, pdfText }) => {
           bottom: "20px",
           right: "20px",
           backgroundColor: "#1A73E8",
-          color: "#fff",
+          color: "#ececec",
           border: "none",
           borderRadius: "50%",
           width: "60px",
@@ -88,7 +88,7 @@ const Chatbot = ({ style, pdfText }) => {
           <div
             style={{
               backgroundColor: "#1A73E8",
-              color: "#fff",
+              color: "#ececec",
               padding: "10px",
               textAlign: "center",
               borderTopLeftRadius: "10px",

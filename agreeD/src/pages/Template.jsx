@@ -136,7 +136,7 @@ const PdfPreview = () => {
     minHeight: "calc(100vh - 92px)",
     padding: "16px",
     backgroundColor: "#171717",
-    color: "#fff",
+    color: "#ececec",
   };
 
   const cardStyle = {
