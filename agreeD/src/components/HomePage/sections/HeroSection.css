@@ -1,7 +1,7 @@
 .hero {
   text-align: center;
   padding: 2rem;
-  color: #fff;
+  color: #ececec;
 }
 
 .date {
@@ -19,7 +19,7 @@
 }
 
 .ctaBtn {
-  background-color: #fff;
+  background-color: #ececec;
   color: #000;
   border: none;
   padding: 0.8rem 2rem;

@@ -32,7 +32,7 @@ const DragDropFile = ({ handleFileUpload }) => {
     position: "relative",
     cursor: "pointer",
     transition: "border-color 0.3s ease",
-    backgroundColor: dragActive ? "#f1f9ff" : "transparent",
+    backgroundColor: dragActive ? "#f1f9ff" : "#222222",
     borderColor: dragActive ? "#1a73e8" : "#d3d3d3",
   };
 
@@ -47,15 +47,20 @@ const DragDropFile = ({ handleFileUpload }) => {
   };
 
   const uploadMessageStyle = {
-    color: "#666",
+    color: "#ececec",
     fontSize: "16px",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItem: "center",
+    justifyContent: "center",
   };
 
   const buttonStyle = {
     marginTop: "10px",
     padding: "8px 16px",
-    backgroundColor: "#1a73e8",
-    color: "#fff",
+    backgroundColor: "orange",
+    color: "#ececec",
     border: "none",
     borderRadius: "4px",
     fontSize: "14px",
@@ -84,8 +89,8 @@ const DragDropFile = ({ handleFileUpload }) => {
           onChange={(e) => handleFileUpload(e.target.files[0])}
         />
         <div style={uploadMessageStyle}>
-          <p>Add a document</p>
-          <p>Drag & drop your PDF here.</p>
+          <p style={{ margin: "0" }}>Add a document</p>
+          <p style={{ marginTop: "5px" }}>Drag & drop your PDF here.</p>
           <button
             type="button"
             style={buttonStyle}

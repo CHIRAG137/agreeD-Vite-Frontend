@@ -5,6 +5,8 @@ import PdfPreview from "./pages/Template";
 import ContractDetails from "./components/contractDetails/ContractDetails";
 import Dashboard from "./pages/Dashboard";
 import Navbar from "./components/navbar/Navbar";
+import FullPageChatbot from "./components/agreeDChatbotPage/FullPageChatbot";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   // State to track the selected page
@@ -14,6 +16,14 @@ function App() {
   const handlePageChange = (page) => {
     setSelectedPage(page);
   };
+
+  if (window.location.pathname.split("/")[1] === "chatbot") {
+    console.log(window.location.pathname.split("/")[2]);
+    if (window.location.pathname.split("/")[2] === undefined) {
+      return <NotFoundPage />;
+    }
+    return <FullPageChatbot />;
+  }
 
   return (
     <>

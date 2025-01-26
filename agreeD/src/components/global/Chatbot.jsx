@@ -1,22 +1,48 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { MdMicNone } from "react-icons/md";
+import { FiSend } from "react-icons/fi";
+import axios from "axios";
 
-const Chatbot = ({ style }) => {
+const Chatbot = ({ style, pdfText }) => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    {
+      role: "bot",
+      text: "Hello, I am ArgreeD, your AI-based assistant. You can ask me anything about your provided document.",
+    },
+  ]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const chatEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
 
   const toggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
+    if (isLoading) {
+      return;
+    }
     if (input.trim() !== "") {
       setMessages((prev) => [...prev, { role: "user", text: input }]);
-      setTimeout(() => {
-        setMessages((prev) => [...prev, { role: "bot", text: "Bot Response" }]);
-      }, 1000);
+      setIsLoading(true);
+
+      const response = await axios.post("http://localhost:3000/api/chatbot/ask", {
+        pdfText,
+        question: input,
+      });
+
+      setMessages((prev) => [...prev, { role: "bot", text: response.data.answer }]);
       setInput("");
+      setIsLoading(false);
     }
   };
 
@@ -29,7 +55,7 @@ const Chatbot = ({ style }) => {
           bottom: "20px",
           right: "20px",
           backgroundColor: "#1A73E8",
-          color: "#fff",
+          color: "#ececec",
           border: "none",
           borderRadius: "50%",
           width: "60px",
@@ -50,7 +76,7 @@ const Chatbot = ({ style }) => {
             position: "fixed",
             bottom: "100px",
             right: "20px",
-            width: "300px",
+            width: "325px",
             height: "400px",
             backgroundColor: "#fff",
             border: "1px solid #ccc",
@@ -65,7 +91,7 @@ const Chatbot = ({ style }) => {
           <div
             style={{
               backgroundColor: "#1A73E8",
-              color: "#fff",
+              color: "#ececec",
               padding: "10px",
               textAlign: "center",
               borderTopLeftRadius: "10px",
@@ -81,6 +107,7 @@ const Chatbot = ({ style }) => {
               flex: 1,
               padding: "10px",
               overflowY: "auto",
+              fontSize: "12px",
             }}
           >
             {messages.map((message, index) => (
@@ -100,39 +127,76 @@ const Chatbot = ({ style }) => {
                     backgroundColor: message.role === "user" ? "#DCF8C6" : "#F1F1F1",
                     maxWidth: "70%",
                     color: "black",
+                    textAlign: "left",
                   }}
                 >
                   {message.text}
                 </span>
               </div>
             ))}
+            {isLoading && <p style={{ color: "black", textAlign: "left" }}>Bot is typing...</p>}
+            <div ref={chatEndRef} />
           </div>
 
           {/* Input Section */}
           <div
             style={{
               display: "flex",
+              flexDirection: "column",
+              gap: "6px",
               padding: "10px",
               borderTop: "1px solid #ccc",
               alignItems: "center",
             }}
           >
-            <input
-              type="text"
-              placeholder="Type your message..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
+            <div
               style={{
-                flex: 1,
-                padding: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
                 border: "1px solid #ccc",
-                borderRadius: "5px",
-                outline: "none",
-                marginRight: "5px",
-                marginBottom: "0",
+                borderRadius: "25px",
+                padding: "2px 12px",
+                width: "90%",
+                backgroundColor: "#f4f4f4",
               }}
-            />
-            <div style={{ display: "flex", gap: "5px" }}>
+              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+            >
+              <input
+                type="text"
+                placeholder="Type your message..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "0",
+                  outline: "none",
+                  marginRight: "0",
+                  marginBottom: "0",
+                  offset: "none",
+                  border: "none",
+                  backgroundColor: "#f4f4f4",
+                  fontSize: "14px",
+                }}
+              />
+              <div
+                onClick={handleSendMessage}
+                style={{
+                  backgroundColor: "transparent",
+                  color: "#666",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                  padding: "0",
+                  transform: "translateY(3px)",
+                  offset: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <FiSend size={20} />
+              </div>
+            </div>
+            {/* <div style={{ display: "flex", gap: "5px" }}>
               <div
                 style={{
                   display: "flex",
@@ -144,20 +208,7 @@ const Chatbot = ({ style }) => {
               >
                 <MdMicNone size={25} />
               </div>
-              <button
-                onClick={handleSendMessage}
-                style={{
-                  backgroundColor: "#2ECC71",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "5px",
-                  padding: "8px 12px",
-                  cursor: "pointer",
-                }}
-              >
-                Send
-              </button>
-            </div>
+            </div> */}
           </div>
         </div>
       )}

@@ -133,8 +133,10 @@ const PdfPreview = () => {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "calc(100vh - 100px)",
+    minHeight: "calc(100vh - 92px)",
     padding: "16px",
+    backgroundColor: "#171717",
+    color: "#ececec",
   };
 
   const cardStyle = {
@@ -143,7 +145,8 @@ const PdfPreview = () => {
     padding: "20px",
     backgroundColor: "white",
     borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 2px 4px rgb(54, 53, 53)",
+    backgroundColor: "#202121",
   };
 
   const buttonStyle = {
@@ -191,11 +194,13 @@ const PdfPreview = () => {
     width: "140px",
     textAlign: "center",
     boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+    backgroundColor: "#222",
   };
 
   const selectedTabButtonStyle = {
     ...tabButtonStyle,
-    backgroundColor: "#4CAF50", // Green background for selected tab
+    backgroundColor: "orange",
+    color: "#000",
   };
 
   const logoStyle = {
@@ -230,7 +235,7 @@ const PdfPreview = () => {
             width: "100%",
           }}
         >
-          <div style={{ ...cardStyle, maxWidth: "1600px", marginRight: "250px" }}>
+          <div style={{ ...cardStyle, maxWidth: "1600px", marginRight: "220px" }}>
             <div
               style={previewContainerStyle}
               onClick={handleClickOnPdf} // Verify this matches your function name exactly
@@ -244,10 +249,10 @@ const PdfPreview = () => {
             style={{
               ...cardStyle,
               position: "fixed",
-              bottom: "4%",
-              top: "12%",
-              right: 0,
-              width: "200px",
+              bottom: "3.5%",
+              top: "12.5%",
+              right: "16px",
+              width: "160px",
               overflowY: "auto",
             }}
           >
@@ -258,7 +263,13 @@ const PdfPreview = () => {
                 type="number"
                 value={pageNumber}
                 onChange={handlePageNumberChange}
-                style={{ marginBottom: "16px", padding: "8px 4px", width: "40px" }}
+                style={{
+                  marginBottom: "16px",
+                  padding: "8px 4px",
+                  width: "40px",
+                  backgroundColor: "#ccc",
+                  borderRadius: "10px",
+                }}
                 min={1}
                 max={1000}
                 placeholder="Page #"

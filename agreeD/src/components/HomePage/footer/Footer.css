@@ -1,6 +1,6 @@
 .footer {
   background-color: #000;
-  color: #fff;
+  color: #ececec;
   padding: 2rem;
   font-size: 0.9rem;
 }
@@ -22,7 +22,7 @@
 }
 
 .link {
-  color: #fff;
+  color: #ececec;
   text-decoration: none;
   display: block;
   margin-bottom: 0.5rem;
@@ -44,7 +44,7 @@
 
 .icon {
   font-size: 1.2rem;
-  color: #fff;
+  color: #ececec;
   text-decoration: none;
 }
 

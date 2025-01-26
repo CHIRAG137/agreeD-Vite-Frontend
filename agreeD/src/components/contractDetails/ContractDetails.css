@@ -2,19 +2,21 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: calc(100vh - 80px);
+  height: calc(100vh - 60px);
   box-sizing: border-box;
+  background-color: #171717;
+  color: #f5f8fa;
 }
 
 .middle-panel,
 .right-panel,
 .left-panel {
   padding-top: 20px;
-  height: 100%;
+  /* height: 100%; */
 }
 
 .middle-panel {
-  background-color: #f5f8fa;
+  background-color: #202121;
   flex: 2;
   border-left: #d6d2d2 5px solid;
   border-right: #d6d2d2 5px solid;
