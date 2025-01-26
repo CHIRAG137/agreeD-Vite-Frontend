@@ -39,10 +39,10 @@ const FullPageChatbot = () => {
     const fetchDocumentDetails = async () => {
       try {
         setIsDataFetchingLoading(true);
-        const response = await fetch(
-          `http://localhost:3000/api/client/${window.location.pathname.split("/")[2]}`
-        );
-        const data = await response.json();
+        const response = await axios.post(`http://localhost:3000/api/client`, {
+          randomString: window.location.pathname.split("/")[2],
+        });
+        const data = response.data;
         console.log(data);
         setDocumentDetails(data);
         setIsDataFetchingLoading(false);
@@ -186,7 +186,16 @@ const FullPageChatbot = () => {
           gap: "20px",
         }}
       >
-        <div style={{ flex: 1, backgroundColor: "#1e1e1e" }}>PDF Preview</div>
+        <div style={{ flex: 1, backgroundColor: "#1e1e1e" }}>
+          <iframe
+            src={documentDetails.driveLink}
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+            }}
+          />
+        </div>
 
         {/* Main Chat Section */}
         <div
