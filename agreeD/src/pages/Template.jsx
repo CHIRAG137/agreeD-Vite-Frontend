@@ -53,7 +53,7 @@ const PdfPreview = () => {
       const page = Math.floor(clickY / pageHeight) + 1; // Add 1 because page numbers are 1-indexed
       // setClickedPage(page);
 
-      setCoords({ clickX, clickY });
+      setCoords({ x: Math.floor(clickX), y: Math.floor(clickY) });
       setPageNumber(page);
       setShowModal(true); // Show modal when a tab is selected
     }
