@@ -237,12 +237,22 @@ const PdfPreview = () => {
         >
           <div style={{ ...cardStyle, maxWidth: "1600px", marginRight: "220px" }}>
             <div
-              style={previewContainerStyle}
+              style={{ position: "relative", ...previewContainerStyle }}
               onClick={handleClickOnPdf} // Verify this matches your function name exactly
             >
               <object data={fileUrl} type="application/pdf" style={objectStyle}>
                 <embed src={fileUrl} type="application/pdf" style={objectStyle} />
               </object>
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "transparent",
+                }}
+              />
             </div>
           </div>
           <div
@@ -306,7 +316,7 @@ const PdfPreview = () => {
             alignItems: "center",
           }}
         >
-          <div style={{ padding: "20px", backgroundColor: "#fff", borderRadius: "8px" }}>
+          <div style={{ padding: "20px", backgroundColor: "#171717", borderRadius: "8px" }}>
             <h3>{selectedTab?.name}</h3>
             <p>
               Coordinates: X: {coords.x}, Y: {coords.y}
@@ -315,11 +325,12 @@ const PdfPreview = () => {
             <button
               onClick={handleSave}
               style={{
-                backgroundColor: "#4CAF50",
+                backgroundColor: "orange",
                 padding: "10px 20px",
-                color: "white",
+                color: "#000",
                 borderRadius: "5px",
                 cursor: "pointer",
+                marginLeft: "10px",
               }}
             >
               Save
