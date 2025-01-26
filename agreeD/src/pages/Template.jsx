@@ -39,12 +39,22 @@ const PdfPreview = () => {
   };
 
   // Handle click on the PDF preview to get coordinates
-  const handleClickOnPdf = (event) => {
+  const handleClickOnPdf = (e) => {
     if (selectedTab) {
-      const rect = event.target.getBoundingClientRect();
-      const x = event.clientX - rect.left; // X coordinate relative to the document
-      const y = event.clientY - rect.top; // Y coordinate relative to the document
-      setCoords({ x, y });
+      // Get the bounding rectangle of the viewer to calculate relative click position
+      const viewerRect = e.target.getBoundingClientRect();
+      const clickX = e.clientX - viewerRect.left;
+      const clickY = e.clientY - viewerRect.top;
+
+      // Calculate which page is clicked based on the Y-axis position
+      const pageHeight = viewerRect.height / e.target.childElementCount; // Assuming equal-sized pages
+      console.log(pageHeight);
+      // Determine the clicked page (integer division of the Y-coordinate by the page height)
+      const page = Math.floor(clickY / pageHeight) + 1; // Add 1 because page numbers are 1-indexed
+      // setClickedPage(page);
+
+      setCoords({ clickX, clickY });
+      setPageNumber(page);
       setShowModal(true); // Show modal when a tab is selected
     }
   };
@@ -243,10 +253,7 @@ const PdfPreview = () => {
           }}
         >
           <div style={{ ...cardStyle, maxWidth: "1600px", marginRight: "220px" }}>
-            <div
-              style={{ position: "relative", ...previewContainerStyle }}
-              onClick={handleClickOnPdf} // Verify this matches your function name exactly
-            >
+            <div style={{ position: "relative", ...previewContainerStyle }}>
               {/* <object data={fileUrl} type="application/pdf" style={objectStyle}>
                 <embed src={fileUrl} type="application/pdf" style={objectStyle} />
               </object> */}
@@ -255,7 +262,7 @@ const PdfPreview = () => {
                   style={{ position: "relative", height: "600px" }} // Adjust height as needed
                   onClick={handleClickOnPdf}
                 >
-                  <Viewer fileUrl={fileUrl} />
+                  <Viewer fileUrl={fileUrl} onLoadSuccess={handlePdfLoadSuccess} />
                 </div>
               </Worker>
             </div>
