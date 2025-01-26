@@ -83,7 +83,10 @@ const UploadButton = () => {
       });
 
       const filePath = response.data.filePath;
+      const driveLink = response.data.driveLink;
+
       localStorage.setItem("uploadedFilePath", filePath);
+      localStorage.setItem("uploadedDriveLink", driveLink);
 
       const { emailContent, structuredDetails, extractedContent } = response.data;
       setEmailContent(emailContent);
@@ -184,6 +187,7 @@ const UploadButton = () => {
         recipientEmail,
         envelopeId, // Include the envelope ID
         heygenVideoId: heygenVideoId, // Include the video ID
+        driveLink: localStorage.getItem("uploadedDriveLink"),
       };
 
       // Step 6: Call the API to save the details in the database
