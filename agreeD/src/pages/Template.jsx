@@ -243,7 +243,7 @@ const PdfPreview = () => {
               <object data={fileUrl} type="application/pdf" style={objectStyle}>
                 <embed src={fileUrl} type="application/pdf" style={objectStyle} />
               </object>
-              <div
+              {/* <div
                 style={{
                   position: "absolute",
                   top: 0,
@@ -252,7 +252,7 @@ const PdfPreview = () => {
                   bottom: 0,
                   backgroundColor: "transparent",
                 }}
-              />
+              /> */}
             </div>
           </div>
           <div
