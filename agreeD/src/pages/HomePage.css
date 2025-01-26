@@ -233,6 +233,10 @@ button {
   transform: translateY(10px);
 }
 
+/* .para-with-img.left-side h3 {
+  text-align: right;
+} */
+
 .para-with-img > div {
   display: flex;
   justify-content: space-between;

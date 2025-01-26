@@ -111,7 +111,7 @@ function HeygenVideoChatbot({ documentDetails, onClose }) {
       console.log("Sending transcript to Gemini:", transcript);
 
       const response = await axios.post("http://localhost:3000/api/chatbot/ask", {
-        pdfText: documentDetails.emailContent,
+        pdfText: `extracted Pdf Content: ${documentDetails.extractedContent} /n  email content: ${documentDetails.emailContent}`,
         question: transcript, // Changed from `input` to `transcript`
       });
 

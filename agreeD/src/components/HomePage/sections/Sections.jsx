@@ -88,7 +88,7 @@ return multierror.Append(err, <-resultWorkerErr)`;
 
       <section id="features" className="section-container">
         <h2>Features</h2>
-        <div className="para-with-img">
+        <div className="para-with-img right-side">
           <h3>email</h3>
           <div>
             <div style={{ display: "flex", gap: "10px", flexDirection: "column" }}>
@@ -104,6 +104,24 @@ return multierror.Append(err, <-resultWorkerErr)`;
               </p>
             </div>
             <img id="email-img" className="image" src="./Emails.png" alt="" />
+          </div>
+        </div>
+        <div className="para-with-img left-side">
+          <h3>email</h3>
+          <div>
+            <img id="email-img" className="image" src="./Emails.png" alt="" />
+            <div style={{ display: "flex", gap: "10px", flexDirection: "column" }}>
+              <p>
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Impedit dolore sint
+                consequatur totam ratione, quas quidem sit maiores est, et voluptatibus veritatis
+                ducimus hic provident molestiae accusamus, optio soluta! Dolorem.
+              </p>
+              <p>
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Impedit dolore sint
+                consequatur totam ratione, quas quidem sit maiores est, et voluptatibus veritatis
+                ducimus hic provident molestiae accusamus, optio soluta! Dolorem.
+              </p>
+            </div>
           </div>
         </div>
       </section>

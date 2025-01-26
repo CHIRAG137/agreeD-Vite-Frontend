@@ -184,7 +184,9 @@ const UploadButton = () => {
         recipientEmail,
         envelopeId, // Include the envelope ID
         heygenVideoId: heygenVideoId, // Include the video ID
+        extractedContent: extractedPdfContent,
       };
+      console.log(extractedPdfContent);
 
       // Step 6: Call the API to save the details in the database
       const saveResponse = await axios.post("http://localhost:3000/api/client/save", savePayload);
@@ -328,7 +330,12 @@ const UploadButton = () => {
         </div>
       )}
 
-      {isModalOpen && <Chatbot style={{ zIndex: "9999" }} pdfText={extractedPdfContent} />}
+      {isModalOpen && (
+        <Chatbot
+          style={{ zIndex: "9999" }}
+          pdfText={`extracted Pdf Content: ${extractedPdfContent} /n  email content: ${emailContent}`}
+        />
+      )}
 
       {isModalOpen && (
         <div className="modal">
