@@ -48,7 +48,7 @@ const PdfPreview = () => {
 
       // Calculate which page is clicked based on the Y-axis position
       const pageHeight = viewerRect.height / e.target.childElementCount; // Assuming equal-sized pages
-      console.log(pageHeight);
+
       // Determine the clicked page (integer division of the Y-coordinate by the page height)
       const page = Math.floor(clickY / pageHeight) + 1; // Add 1 because page numbers are 1-indexed
       // setClickedPage(page);

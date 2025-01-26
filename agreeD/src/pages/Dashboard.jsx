@@ -50,10 +50,8 @@ const Dashboard = ({ handlePageChange }) => {
                   }}
                 >
                   <a
-                    href={`#contract-details/${"678fc9eed4e62fc6505bedce"}`}
-                    onClick={() =>
-                      handlePageChange(`contract-details/${"678fc9eed4e62fc6505bedce"}`)
-                    }
+                    href={`#contract-details/${client._id}`}
+                    onClick={() => handlePageChange(`contract-details/${client._id}`)}
                   >
                     {client.clientName}
                   </a>
@@ -97,7 +95,13 @@ const Dashboard = ({ handlePageChange }) => {
                 </td>
                 <td>{client.recipientEmail}</td>
                 <td>
-                  <a href={client.heygenVideoLink} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`https://resource2.heygen.ai/video/${
+                      client.heygenVideoId || "92f93fc53304401cad3f8426633d8cb2"
+                    }`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Video
                   </a>
                 </td>
