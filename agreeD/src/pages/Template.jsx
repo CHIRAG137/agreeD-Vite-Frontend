@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
 import DragDropFile from "../components/TemplatePage/DragDropFile";
+import { Worker, Viewer } from "@react-pdf-viewer/core";
+import "@react-pdf-viewer/core/lib/styles/index.css"; // Style for the PDF viewer
+
+// Your function that gets triggered on PDF click
+const handleClickOnPdf = () => {
+  console.log("PDF Clicked!");
+};
 
 const PdfPreview = () => {
   const [file, setFile] = useState(null);
@@ -240,19 +247,17 @@ const PdfPreview = () => {
               style={{ position: "relative", ...previewContainerStyle }}
               onClick={handleClickOnPdf} // Verify this matches your function name exactly
             >
-              <object data={fileUrl} type="application/pdf" style={objectStyle}>
+              {/* <object data={fileUrl} type="application/pdf" style={objectStyle}>
                 <embed src={fileUrl} type="application/pdf" style={objectStyle} />
-              </object>
-              {/* <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: "transparent",
-                }}
-              /> */}
+              </object> */}
+              <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
+                <div
+                  style={{ position: "relative", height: "600px" }} // Adjust height as needed
+                  onClick={handleClickOnPdf}
+                >
+                  <Viewer fileUrl={fileUrl} />
+                </div>
+              </Worker>
             </div>
           </div>
           <div
