@@ -1,4 +1,4 @@
-const Modal = ({ isOpen, onClose, children, style = {} }) => {
+const Modal = ({ isOpen, onClose, children, style = {}, hideCloseBtn = false }) => {
   if (!isOpen) return null;
 
   const modalStyles = {
@@ -37,9 +37,11 @@ const Modal = ({ isOpen, onClose, children, style = {} }) => {
   return (
     <div style={modalStyles} onClick={onClose}>
       <div style={modalContentStyles} onClick={(e) => e.stopPropagation()}>
-        <button style={closeButtonStyles} onClick={onClose}>
-          &times;
-        </button>
+        {!hideCloseBtn && (
+          <button style={closeButtonStyles} onClick={onClose}>
+            &times;
+          </button>
+        )}
         {children}
       </div>
     </div>

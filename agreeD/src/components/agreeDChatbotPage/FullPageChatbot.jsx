@@ -117,11 +117,7 @@ const FullPageChatbot = () => {
       )}
 
       {isVideoAssistantModalOpen && (
-        <Modal
-          isOpen={isVideoAssistantModalOpen}
-          onClose={closeVideoAssistantModal}
-          style={{ width: "500px" }}
-        >
+        <Modal isOpen={isVideoAssistantModalOpen} hideCloseBtn={true}>
           <h2
             style={{
               padding: "0 0 10px",
@@ -133,7 +129,10 @@ const FullPageChatbot = () => {
             Video Assistant
           </h2>
           <div>
-            <HeygenVideoChatbot documentDetails={documentDetails} />
+            <HeygenVideoChatbot
+              onClose={closeVideoAssistantModal}
+              documentDetails={documentDetails}
+            />
           </div>
         </Modal>
       )}
