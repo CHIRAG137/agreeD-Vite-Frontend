@@ -262,7 +262,7 @@ const PdfPreview = () => {
                   style={{ position: "relative", height: "600px" }} // Adjust height as needed
                   onClick={handleClickOnPdf}
                 >
-                  <Viewer fileUrl={fileUrl} onLoadSuccess={handlePdfLoadSuccess} />
+                  <Viewer fileUrl={fileUrl} />
                 </div>
               </Worker>
             </div>
