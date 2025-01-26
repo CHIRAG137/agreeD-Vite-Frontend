@@ -173,7 +173,9 @@ return multierror.Append(err, <-resultWorkerErr)`;
         loop
         muted
         src="./calender.mp4"
-        ref={(e) => (e.playbackRate = 0.5)}
+        // ref={(e) => {
+        //   e.playbackRate = e !== null && 0.5;
+        // }}
       ></video>
       <video
         height="auto"
