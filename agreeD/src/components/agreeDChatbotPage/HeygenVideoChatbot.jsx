@@ -5,7 +5,9 @@ import StreamingAvatar, {
   TaskType,
 } from "@heygen/streaming-avatar";
 import "regenerator-runtime/runtime";
-import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 import axios from "axios";
 
 function HeygenVideoChatbot({ documentDetails }) {
@@ -22,10 +24,13 @@ function HeygenVideoChatbot({ documentDetails }) {
   const fetchAccessToken = async () => {
     try {
       const apiKey = import.meta.env.VITE_HEYGEN_API_KEY;
-      const response = await fetch("https://api.heygen.com/v1/streaming.create_token", {
-        method: "POST",
-        headers: { "x-api-key": apiKey },
-      });
+      const response = await fetch(
+        "https://api.heygen.com/v1/streaming.create_token",
+        {
+          method: "POST",
+          headers: { "x-api-key": apiKey },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to fetch access token: ${response.statusText}`);
@@ -35,6 +40,7 @@ function HeygenVideoChatbot({ documentDetails }) {
       return data.token;
     } catch (error) {
       console.error("Error fetching access token:", error.message);
+      setStatus(`Error: ${error.message}`);
       throw error;
     }
   };
@@ -55,13 +61,15 @@ function HeygenVideoChatbot({ documentDetails }) {
       setIsSessionActive(true);
 
       newAvatar.on(StreamingEvents.STREAM_READY, handleStreamReady);
-      newAvatar.on(StreamingEvents.STREAM_DISCONNECTED, handleStreamDisconnected);
+      newAvatar.on(
+        StreamingEvents.STREAM_DISCONNECTED,
+        handleStreamDisconnected
+      );
       setIsStartupCompleted(true);
 
-      setIsStartupCompleted(true);
       setStatus("Avatar session initialized.");
     } catch (error) {
-      setStatus("Failed to initialize avatar session.");
+      setStatus(`Failed to initialize avatar session: ${error.message}`);
       console.error("Error initializing avatar session:", error.message);
     }
   };
@@ -73,7 +81,7 @@ function HeygenVideoChatbot({ documentDetails }) {
     initializeSession();
   }, []);
 
-  useEffect(async () => {
+  useEffect(() => {
     const greetingSpeech = async () => {
       if (isStartupCompleted && avatar && sessionData) {
         await avatar.speak({
@@ -83,8 +91,11 @@ function HeygenVideoChatbot({ documentDetails }) {
         });
       }
     };
-    greetingSpeech();
-    startListening();
+
+    if (isStartupCompleted && avatar && sessionData) {
+      greetingSpeech();
+      startListening();
+    }
   }, [isStartupCompleted, avatar, sessionData]);
 
   // Start SpeechRecognition
@@ -98,15 +109,20 @@ function HeygenVideoChatbot({ documentDetails }) {
   // Detect silence and stop SpeechRecognition after 10 second
   const handleSilenceTimeout = async () => {
     console.log("Silence detected, stopping recognition...");
-    setStatus("Silence detected, stopping recognition... and your query is processing");
+    setStatus(
+      "Silence detected, stopping recognition... and your query is processing"
+    );
     SpeechRecognition.stopListening();
     if (transcript.trim()) {
       console.log("Sending transcript to Gemini:", transcript);
 
-      const response = await axios.post("http://localhost:3000/api/chatbot/ask", {
-        pdfText: documentDetails.emailContent,
-        question: transcript, // Changed from `input` to `transcript`
-      });
+      const response = await axios.post(
+        "http://localhost:3000/api/chatbot/ask",
+        {
+          pdfText: documentDetails.emailContent,
+          question: transcript, // Changed from `input` to `transcript`
+        }
+      );
 
       handleSpeak(response.data.answer);
     }
@@ -120,15 +136,15 @@ function HeygenVideoChatbot({ documentDetails }) {
         clearTimeout(silenceTimeout);
       }
 
-      // Set new timeout to stop listening after 10 second of silence
+      // Set new timeout to stop listening after 10 seconds of silence
       const timeout = setTimeout(handleSilenceTimeout, 10000);
-
       setSilenceTimeout(timeout);
-    }
 
-    // return () => {
-    //   if (silenceTimeout) clearTimeout(silenceTimeout);
-    // };
+      // Cleanup function to clear timeout
+      // return () => {
+      //   if (silenceTimeout) clearTimeout(silenceTimeout);
+      // };
+    }
   }, [transcript, listening]);
 
   const handleStreamReady = (event) => {
@@ -218,12 +234,27 @@ function HeygenVideoChatbot({ documentDetails }) {
         </div>
 
         {status && (
-          <p style={{ padding: "0 18px", color: "orange", textAlign: "left" }}>{status}</p>
+          <p style={{ padding: "0 18px", color: "orange", textAlign: "left" }}>
+            {status}
+          </p>
         )}
 
         {/* Controls Section */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            width: "100%",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "10px",
+            }}
+          >
             <button
               onClick={terminateAvatarSession}
               disabled={!isSessionActive}
