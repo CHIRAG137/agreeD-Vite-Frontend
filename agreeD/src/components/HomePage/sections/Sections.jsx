@@ -58,15 +58,14 @@ return multierror.Append(err, <-resultWorkerErr)`;
                 single time.
               </p>
             </div>
-            <img id="email-img" className="image" src="./Emails.png" alt="" />
+            <img id="email-img" className="image" src="./Emails.png" alt="" height="300px" />
           </div>
         </div>
         <div className="para-with-img left-side">
           <h3>Contract Signing</h3>
           <div>
             <img
-              height="auto"
-              width="500px"
+              height="260px"
               id="template-creation-img"
               className="image"
               src="./template creation.png"
@@ -112,8 +111,7 @@ return multierror.Append(err, <-resultWorkerErr)`;
               </p>
             </div>
             <video
-              height="auto"
-              width="500px"
+              height="220px"
               id="ai-calls-video"
               className="video"
               autoPlay
@@ -127,8 +125,7 @@ return multierror.Append(err, <-resultWorkerErr)`;
           <h3>Contract Bot, Facing Issues Understanding Contract?</h3>
           <div>
             <video
-              height="auto"
-              width="500px"
+              height="220px"
               id="video-stream-video"
               className="video"
               autoPlay
@@ -175,8 +172,7 @@ return multierror.Append(err, <-resultWorkerErr)`;
               </p>
             </div>
             <video
-              height="auto"
-              width="500px"
+              height="220px"
               id="ask-questions-video"
               className="video"
               autoPlay
@@ -190,8 +186,7 @@ return multierror.Append(err, <-resultWorkerErr)`;
           <h3>Templates-Contract Management Made Easy!</h3>
           <div>
             <video
-              height="auto"
-              width="500px"
+              height="220px"
               id="signing-contract-video"
               className="video"
               autoPlay
@@ -238,8 +233,7 @@ return multierror.Append(err, <-resultWorkerErr)`;
               </p>
             </div>
             <video
-              height="auto"
-              width="500px"
+              height="220px"
               id="calender-video"
               className="video"
               autoPlay
