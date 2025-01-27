@@ -28,14 +28,23 @@ const HomePage = () => {
         <a style={{ color: "#fff" }} href="#hero-section">
           Intro
         </a>
-        <a style={{ color: "#fff" }} href="#limitations-section">
-          Limitations
+        <a style={{ color: "#fff" }} href="#features-section">
+          Key Features
         </a>
-        <a style={{ color: "#fff" }} href="#iterative-deployment-section">
-          Iterative Deployment
+        <a style={{ color: "#fff" }} href="#works-section">
+          How It Works
         </a>
-        <a style={{ color: "#fff" }} href="#setup-section">
-          Setup
+        <a style={{ color: "#fff" }} href="#local-deployment-section">
+          Local Deployment
+        </a>
+        <a style={{ color: "#fff" }} href="#demo-section">
+          Demo and Showcase
+        </a>
+        <a style={{ color: "#fff" }} href="#team-section">
+          Meet the Team
+        </a>
+        <a style={{ color: "#fff" }} href="#contact-us-section">
+          Contact Us
         </a>
       </div>
     </div>
