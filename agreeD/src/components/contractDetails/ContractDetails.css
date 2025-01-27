@@ -5,7 +5,7 @@
   height: calc(100vh - 60px);
   box-sizing: border-box;
   background-color: #171717;
-  color: #f5f8fa;
+  color: #ececec;
 }
 
 .middle-panel,
@@ -29,5 +29,5 @@
 }
 
 .active-tab {
-  border-bottom: 2px solid #000000;
+  border-bottom: 3px solid #313131;
 }

@@ -31,7 +31,6 @@ const ContractDetails = ({ selectedPage, onPageChange }) => {
     <div className="contract-details-container">
       <LeftPanel contractDetails={contractDetails} onPageChange={onPageChange} />
       <MiddlePanel contractDetails={contractDetails} />
-      <RightPanel contractDetails={contractDetails} />
     </div>
     // </div>
   );

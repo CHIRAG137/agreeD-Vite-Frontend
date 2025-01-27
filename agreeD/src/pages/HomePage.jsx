@@ -6,7 +6,7 @@ import Sections from "../components/HomePage/sections/Sections";
 
 const HomePage = () => {
   return (
-    <div style={{ backgroundColor: "#000", color: "#ffffff", position: "relative" }}>
+    <div style={{ backgroundColor: "#000", position: "relative" }}>
       <section id="hero-section">
         <HeroSection />
       </section>
@@ -33,9 +33,6 @@ const HomePage = () => {
         </a>
         <a style={{ color: "#fff" }} href="#works-section">
           How It Works
-        </a>
-        <a style={{ color: "#fff" }} href="#local-deployment-section">
-          Local Deployment
         </a>
         <a style={{ color: "#fff" }} href="#demo-section">
           Demo and Showcase
