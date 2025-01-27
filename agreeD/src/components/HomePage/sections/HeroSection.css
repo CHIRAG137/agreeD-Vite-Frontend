@@ -1,7 +1,6 @@
 .hero {
   text-align: center;
   padding: 2rem;
-  color: #ececec;
 }
 
 .date {
@@ -19,15 +18,19 @@
 }
 
 .ctaBtn {
-  background-color: #ececec;
+  background-color: #fff;
   color: #000;
   border: none;
   padding: 0.8rem 2rem;
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 50px;
   margin-right: 1rem;
+}
+
+.ctaBtn:hover {
+  background-color: #fdc969;
 }
 
 .description {

@@ -60,7 +60,7 @@ const DragDropFile = ({ handleFileUpload }) => {
     marginTop: "10px",
     padding: "8px 16px",
     backgroundColor: "orange",
-    color: "#ececec",
+    color: "#000",
     border: "none",
     borderRadius: "4px",
     fontSize: "14px",

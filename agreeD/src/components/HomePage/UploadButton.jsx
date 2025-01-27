@@ -4,6 +4,14 @@ import Chatbot from "../global/Chatbot";
 import { IoMdClose } from "react-icons/io";
 import { convertDateFormat } from "../../utils/DateFormatConvert";
 
+const generateRandomString = (length = 16) => {
+  const array = new Uint8Array(length);
+  window.crypto.getRandomValues(array);
+  return Array.from(array, (byte) => byte.toString(36))
+    .join("")
+    .slice(0, length);
+};
+
 const UploadButton = () => {
   const [file, setFile] = useState(null);
   const [emailContent, setEmailContent] = useState("");
@@ -19,6 +27,8 @@ const UploadButton = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
   const [structuredDetails, setStructuredDetails] = useState({});
+  const [includePaymentLink, setIncludePaymentLink] = useState(false);
+  const [includeChatbotLink, setIncludeChatbotLink] = useState(false);
 
   // useEffect(() => {
   //   let intervalId;
@@ -156,16 +166,49 @@ const UploadButton = () => {
 
       console.log("Video generated with ID:", heygenVideoId);
 
-      // Step 3: Prepare the payload for creating an envelope (DocuSign)
+      const randomString = generateRandomString(32);
+      console.log(randomString);
+
+      let updatedEmailContent = emailContent;
+      // Step 3: Replace $abc with heygen video link
+      if (includeChatbotLink) {
+        updatedEmailContent = updatedEmailContent.replace(
+          "$abc",
+          `For assistance, you can interact with our AI assistant, trained on this document, here: 
+          <a href="http://localhost:5173/chatbot/${randomString}" target="_blank" > http://localhost:5173/chatbot/${randomString} </a>.`
+        );
+      } else {
+        updatedEmailContent = updatedEmailContent.replace("$abc", "");
+      }
+
+      // Step 4: Call the create-payment-link endpoint to create the stripe payment linkvand Replace $xyz in email with payment link
+      if (includePaymentLink) {
+        const stripePaymentResponse = await axios.post(
+          "http://localhost:3000/api/stripe/create-payment-link",
+          { amount: 10000, currency: "usd", description: "testing", quantity: 1 }
+        );
+        if (!stripePaymentResponse.data || !stripePaymentResponse.data.url) {
+          throw new Error("Failed to create envelope. No envelope ID returned.");
+        }
+        updatedEmailContent = updatedEmailContent.replace(
+          "$xyz",
+          `Please follow this link to complete your payment:
+          <a href="${stripePaymentResponse.data.url}" target="_blank" > ${stripePaymentResponse.data.url} </a>.`
+        );
+      } else {
+        updatedEmailContent = updatedEmailContent.replace("$xyz", "");
+      }
+
+      // Step 5: Prepare the payload for creating an envelope (DocuSign)
       const envelopePayload = {
         signerEmail: recipientEmail,
         signerName: recipientEmail.split("@")[0], // Using email username as name
         filePath: filePath,
         emailSubject: subject,
-        emailContent: emailContent,
+        emailContent: updatedEmailContent,
       };
 
-      // Step 4: Call the create-envelope endpoint to create the envelope
+      // Step 6: Call the create-envelope endpoint to create the envelope
       const envelopeResponse = await axios.post(
         "http://localhost:3000/api/docusign/create-envelope",
         envelopePayload
@@ -179,24 +222,27 @@ const UploadButton = () => {
 
       const envelopeId = envelopeResponse.data.envelopeId;
 
-      // Step 5: Prepare the payload for saving data, including video ID
+      // Step 7: Prepare the payload for saving data, including video ID
       const savePayload = {
         structuredDetails,
-        emailContent,
+        emailContent: updatedEmailContent,
         subject,
         recipientEmail,
         envelopeId, // Include the envelope ID
         heygenVideoId: heygenVideoId, // Include the video ID
         driveLink: localStorage.getItem("uploadedDriveLink"),
+        extractedContent: extractedPdfContent,
+        randomString,
       };
+      console.log(extractedPdfContent);
 
-      // Step 6: Call the API to save the details in the database
+      // Step 8: Call the API to save the details in the database
       const saveResponse = await axios.post("http://localhost:3000/api/client/save", savePayload);
 
       if (saveResponse.data.success) {
         console.log("Details saved successfully:", saveResponse.data.data);
 
-        // Step 7: Call the API to schedule event on google calender in all emails
+        // Step 9: Call the API to schedule event on google calender in all emails
         await axios.post("http://localhost:3000/api/calender/schedule", {
           emails: structuredDetails.emailAddresses.map((email) => email.email) || [],
           events:
@@ -332,7 +378,12 @@ const UploadButton = () => {
         </div>
       )}
 
-      {isModalOpen && <Chatbot style={{ zIndex: "9999" }} pdfText={extractedPdfContent} />}
+      {isModalOpen && (
+        <Chatbot
+          style={{ zIndex: "9999" }}
+          pdfText={`extracted Pdf Content: ${extractedPdfContent} /n  email content: ${emailContent}`}
+        />
+      )}
 
       {isModalOpen && (
         <div className="modal">
@@ -736,6 +787,32 @@ const UploadButton = () => {
                 />
 
                 <div className="modal-actions">
+                  <label htmlFor="includePaymentLink">
+                    <input
+                      type="checkbox"
+                      name=""
+                      id="includePaymentLink"
+                      checked={includePaymentLink}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setIncludePaymentLink(!includePaymentLink);
+                      }}
+                    />
+                    Add Payment Link
+                  </label>
+                  <label htmlFor="includeChatbotLink">
+                    <input
+                      type="checkbox"
+                      name=""
+                      id="includeChatbotLink"
+                      checked={includeChatbotLink}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setIncludeChatbotLink(!includeChatbotLink);
+                      }}
+                    />
+                    Add Chatbot Link
+                  </label>
                   <button onClick={closeModal}>Close</button>
                   <button onClick={sendDocumentForSigning}>Send without Video</button>
                   <button onClick={sendWithVideo}>Generate Video</button>

@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
 import DragDropFile from "../components/TemplatePage/DragDropFile";
+import { Worker, Viewer } from "@react-pdf-viewer/core";
+import "@react-pdf-viewer/core/lib/styles/index.css"; // Style for the PDF viewer
+
+// Your function that gets triggered on PDF click
+const handleClickOnPdf = () => {
+  console.log("PDF Clicked!");
+};
 
 const PdfPreview = () => {
   const [file, setFile] = useState(null);
@@ -32,12 +39,22 @@ const PdfPreview = () => {
   };
 
   // Handle click on the PDF preview to get coordinates
-  const handleClickOnPdf = (event) => {
+  const handleClickOnPdf = (e) => {
     if (selectedTab) {
-      const rect = event.target.getBoundingClientRect();
-      const x = event.clientX - rect.left; // X coordinate relative to the document
-      const y = event.clientY - rect.top; // Y coordinate relative to the document
-      setCoords({ x, y });
+      // Get the bounding rectangle of the viewer to calculate relative click position
+      const viewerRect = e.target.getBoundingClientRect();
+      const clickX = e.clientX - viewerRect.left;
+      const clickY = e.clientY - viewerRect.top;
+
+      // Calculate which page is clicked based on the Y-axis position
+      const pageHeight = viewerRect.height / e.target.childElementCount; // Assuming equal-sized pages
+
+      // Determine the clicked page (integer division of the Y-coordinate by the page height)
+      const page = Math.floor(clickY / pageHeight) + 1; // Add 1 because page numbers are 1-indexed
+      // setClickedPage(page);
+
+      setCoords({ x: Math.floor(clickX), y: Math.floor(clickY) });
+      setPageNumber(page);
       setShowModal(true); // Show modal when a tab is selected
     }
   };
@@ -236,13 +253,18 @@ const PdfPreview = () => {
           }}
         >
           <div style={{ ...cardStyle, maxWidth: "1600px", marginRight: "220px" }}>
-            <div
-              style={previewContainerStyle}
-              onClick={handleClickOnPdf} // Verify this matches your function name exactly
-            >
-              <object data={fileUrl} type="application/pdf" style={objectStyle}>
+            <div style={{ position: "relative", ...previewContainerStyle }}>
+              {/* <object data={fileUrl} type="application/pdf" style={objectStyle}>
                 <embed src={fileUrl} type="application/pdf" style={objectStyle} />
-              </object>
+              </object> */}
+              <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
+                <div
+                  style={{ position: "relative", height: "600px" }} // Adjust height as needed
+                  onClick={handleClickOnPdf}
+                >
+                  <Viewer fileUrl={fileUrl} />
+                </div>
+              </Worker>
             </div>
           </div>
           <div
@@ -306,7 +328,7 @@ const PdfPreview = () => {
             alignItems: "center",
           }}
         >
-          <div style={{ padding: "20px", backgroundColor: "#fff", borderRadius: "8px" }}>
+          <div style={{ padding: "20px", backgroundColor: "#171717", borderRadius: "8px" }}>
             <h3>{selectedTab?.name}</h3>
             <p>
               Coordinates: X: {coords.x}, Y: {coords.y}
@@ -315,11 +337,12 @@ const PdfPreview = () => {
             <button
               onClick={handleSave}
               style={{
-                backgroundColor: "#4CAF50",
+                backgroundColor: "orange",
                 padding: "10px 20px",
-                color: "white",
+                color: "#000",
                 borderRadius: "5px",
                 cursor: "pointer",
+                marginLeft: "10px",
               }}
             >
               Save
