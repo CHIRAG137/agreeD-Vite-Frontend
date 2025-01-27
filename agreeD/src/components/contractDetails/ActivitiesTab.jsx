@@ -51,7 +51,7 @@ const ActivitiesTab = ({ contractDetails }) => {
             </>
           )
         )}
-        {(contractDetails?.callContent?.length > 0 || callContent.slice(0, 2)).map((callInfo) => (
+        {callContent.slice(0, 2).map((callInfo) => (
           <>
             <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
               <div style={{ textAlign: "start", fontSize: "18px" }}>Call:</div>
