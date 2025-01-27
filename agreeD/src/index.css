@@ -69,21 +69,28 @@ button:focus-visible {
 } */
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: grey;
-  border-radius: 10px;
-  transition: background-color 0.3s;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: grey;
+  width: 12px; /* Width of the scrollbar */
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #f1f1f1;
-  border-radius: 10px;
+  background: #0d0d0d; /* Deep black for the track */
+  border-radius: 10px; /* Rounded corners for the track */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a; /* Slightly lighter black for contrast */
+  border-radius: 10px; /* Rounded thumb edges */
+  border: 2px solid #0d0d0d; /* Matches the track background for a seamless look */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #1a1a1a); /* Black with a subtle orange accent on hover */
+  cursor: pointer; /* Indicate interaction */
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(
+    135deg,
+    #0d0d0d
+  ); /* Darker black with a slight orange tint for active state */
 }

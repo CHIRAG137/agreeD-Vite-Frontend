@@ -3,6 +3,7 @@ import axios from "axios";
 import Chatbot from "../global/Chatbot";
 import { IoMdClose } from "react-icons/io";
 import { convertDateFormat } from "../../utils/DateFormatConvert";
+import Loader from "../global/Loader";
 
 const generateRandomString = (length = 16) => {
   const array = new Uint8Array(length);
@@ -314,6 +315,7 @@ const UploadButton = () => {
 
   return (
     <div className="upload-container">
+      {isLoading && <Loader />}
       <div className="ctaButtons">
         {!showTemplateDropdown && (
           <>
@@ -348,7 +350,6 @@ const UploadButton = () => {
           </select>
         )}
       </div>
-
       <input
         type="file"
         id="upload"
@@ -356,19 +357,22 @@ const UploadButton = () => {
         onChange={handleUpload}
         accept=".pdf,.docx"
       />
-
       {isLoading && (
         <div className="loading" style={{ color: "orange" }}>
           Uploading...
         </div>
       )}
-
       {/* Display email input when a template is selected */}
       {selectedTemplate && (
         <div className="email-section">
           <h4>Enter Email Details</h4>
           <label htmlFor="recipientEmail">Recipient Email:</label>
           <input
+            style={{
+              backgroundColor: "transparent",
+              color: "#ececec",
+              border: "1px solid #313131",
+            }}
             type="email"
             id="recipientEmail"
             value={recipientEmail}
@@ -377,23 +381,26 @@ const UploadButton = () => {
           />
         </div>
       )}
-
       {isModalOpen && (
         <Chatbot
           style={{ zIndex: "9999" }}
           pdfText={`extracted Pdf Content: ${extractedPdfContent} /n  email content: ${emailContent}`}
         />
       )}
-
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
             <div className="row">
-              <div className="details-column">
+              <div className="details-column" style={{ overflowY: "auto" }}>
                 {structuredDetails && (
                   <>
                     <label>Client Name:</label>
                     <input
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "#ececec",
+                        border: "1px solid #313131",
+                      }}
                       type="text"
                       value={structuredDetails.clientName || ""}
                       onChange={(e) =>
@@ -405,6 +412,11 @@ const UploadButton = () => {
                     />
                     <label>Contact Person:</label>
                     <input
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "#ececec",
+                        border: "1px solid #313131",
+                      }}
                       type="text"
                       value={structuredDetails.contactPerson || ""}
                       onChange={(e) =>
@@ -418,10 +430,10 @@ const UploadButton = () => {
                     <div
                       style={{
                         borderRadius: "5px",
-                        border: "1px solid #ccc",
+                        border: "1px solid #313131",
                         padding: "10px",
                         marginBottom: "20px",
-                        borderLeft: "3px solid red",
+                        borderLeft: "3px solid orange",
                       }}
                     >
                       {structuredDetails.dates &&
@@ -433,7 +445,7 @@ const UploadButton = () => {
                               flexDirection: "row", // Change to column layout
                               marginBottom: "20px", // Optional for spacing between groups
                               position: "relative",
-                              border: "1px solid #ccc",
+                              border: "1px solid #313131",
                               borderRadius: "5px",
                             }}
                           >
@@ -443,6 +455,7 @@ const UploadButton = () => {
                                 placeholder="Date"
                                 style={{
                                   width: "95%",
+                                  color: "#ececec",
                                   backgroundColor: "transparent",
                                   border: "none",
                                   borderRadius: "0",
@@ -459,13 +472,16 @@ const UploadButton = () => {
                                   });
                                 }}
                               />
-                              <div style={{ borderBottom: "1px solid #ccc", width: "100%" }}></div>
+                              <div
+                                style={{ borderBottom: "1px solid #313131", width: "100%" }}
+                              ></div>
                               <input
                                 type="text"
                                 placeholder="Type"
                                 style={{
-                                  width: "95%",
+                                  color: "#ececec",
                                   backgroundColor: "transparent",
+                                  width: "95%",
                                   border: "none",
                                   borderRadius: "0",
                                   padding: "10px",
@@ -507,6 +523,7 @@ const UploadButton = () => {
                           </div>
                         ))}
                       <button
+                        style={{ backgroundColor: "orange", color: "#000" }}
                         onClick={() =>
                           setStructuredDetails({
                             ...structuredDetails,
@@ -520,6 +537,11 @@ const UploadButton = () => {
 
                     <label>Address:</label>
                     <input
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "#ececec",
+                        border: "1px solid #313131",
+                      }}
                       type="text"
                       value={structuredDetails.address || ""}
                       onChange={(e) =>
@@ -531,6 +553,11 @@ const UploadButton = () => {
                     />
                     <label>Cost:</label>
                     <input
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "#ececec",
+                        border: "1px solid #313131",
+                      }}
                       type="text"
                       value={structuredDetails.paymentTerms || ""}
                       onChange={(e) =>
@@ -544,7 +571,7 @@ const UploadButton = () => {
                     <div
                       style={{
                         borderRadius: "5px",
-                        border: "1px solid #ccc",
+                        border: "1px solid #313131",
                         padding: "10px",
                         marginBottom: "20px",
                         borderLeft: "3px solid red",
@@ -559,7 +586,7 @@ const UploadButton = () => {
                               flexDirection: "row", // Change to column layout
                               marginBottom: "20px", // Optional for spacing between groups
                               position: "relative",
-                              border: "1px solid #ccc",
+                              border: "1px solid #313131",
                               borderRadius: "5px",
                             }}
                           >
@@ -568,8 +595,9 @@ const UploadButton = () => {
                                 type="text"
                                 placeholder="Name"
                                 style={{
-                                  width: "95%",
+                                  color: "#ececec",
                                   backgroundColor: "transparent",
+                                  width: "95%",
                                   border: "none",
                                   borderRadius: "0",
                                   padding: "10px",
@@ -585,13 +613,16 @@ const UploadButton = () => {
                                   });
                                 }}
                               />
-                              <div style={{ borderBottom: "1px solid #ccc", width: "100%" }}></div>
+                              <div
+                                style={{ borderBottom: "1px solid #313131", width: "100%" }}
+                              ></div>
                               <input
                                 type="email"
                                 placeholder="Email"
                                 style={{
                                   width: "95%",
                                   backgroundColor: "transparent",
+                                  color: "#ececec",
                                   border: "none",
                                   borderRadius: "0",
                                   padding: "10px",
@@ -615,8 +646,9 @@ const UploadButton = () => {
                                 right: "-2%",
                                 borderRadius: "100px",
                                 textAlign: "center",
-                                backgroundColor: "red",
                                 padding: "2px 3px",
+                                backgroundColor: "orange",
+                                color: "#000",
                               }}
                               onClick={() => {
                                 const updatedEmails = structuredDetails.emailAddresses.filter(
@@ -633,6 +665,7 @@ const UploadButton = () => {
                           </div>
                         ))}
                       <button
+                        style={{ backgroundColor: "orange", color: "#000" }}
                         onClick={() =>
                           setStructuredDetails({
                             ...structuredDetails,
@@ -651,7 +684,7 @@ const UploadButton = () => {
                     <div
                       style={{
                         borderRadius: "5px",
-                        border: "1px solid #ccc",
+                        border: "1px solid #313131",
                         padding: "10px",
                         marginBottom: "20px",
                         borderLeft: "3px solid red",
@@ -666,7 +699,7 @@ const UploadButton = () => {
                               flexDirection: "row", // Change to column layout
                               marginBottom: "20px", // Optional for spacing between groups
                               position: "relative",
-                              border: "1px solid #ccc",
+                              border: "1px solid #313131",
                               borderRadius: "5px",
                             }}
                           >
@@ -677,6 +710,7 @@ const UploadButton = () => {
                                 style={{
                                   width: "95%",
                                   backgroundColor: "transparent",
+                                  color: "#ececec",
                                   border: "none",
                                   borderRadius: "0",
                                   padding: "10px",
@@ -692,11 +726,14 @@ const UploadButton = () => {
                                   });
                                 }}
                               />
-                              <div style={{ borderBottom: "1px solid #ccc", width: "100%" }}></div>
+                              <div
+                                style={{ borderBottom: "1px solid #313131", width: "100%" }}
+                              ></div>
                               <input
                                 type="text"
                                 placeholder="Phone"
                                 style={{
+                                  color: "#ececec",
                                   width: "95%",
                                   backgroundColor: "transparent",
                                   border: "none",
@@ -722,7 +759,8 @@ const UploadButton = () => {
                                 right: "-2%",
                                 borderRadius: "100px",
                                 textAlign: "center",
-                                backgroundColor: "red",
+                                backgroundColor: "orange",
+                                color: "#000",
                                 padding: "2px 3px",
                               }}
                               onClick={() => {
@@ -740,6 +778,7 @@ const UploadButton = () => {
                           </div>
                         ))}
                       <button
+                        style={{ backgroundColor: "orange", color: "#000" }}
                         onClick={() =>
                           setStructuredDetails({
                             ...structuredDetails,
@@ -756,11 +795,16 @@ const UploadButton = () => {
                   </>
                 )}
               </div>
-              <div className="email-column">
+              <div className="email-column" style={{ overflowY: "auto" }}>
                 <div style={{ display: "flex", gap: "10px" }}>
                   <div>
                     <label htmlFor="recipientEmail">Recipient Email:</label>
                     <input
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "#ececec",
+                        border: "1px solid #313131",
+                      }}
                       type="email"
                       id="recipientEmail"
                       value={recipientEmail}
@@ -771,6 +815,11 @@ const UploadButton = () => {
                   <div>
                     <label htmlFor="subject">Subject:</label>
                     <input
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "#ececec",
+                        border: "1px solid #313131",
+                      }}
                       type="text"
                       id="subject"
                       value={subject}
@@ -784,11 +833,21 @@ const UploadButton = () => {
                   onChange={(e) => setEmailContent(e.target.value)}
                   rows="10"
                   cols="50"
+                  style={{
+                    backgroundColor: "transparent",
+                    color: "#ececec",
+                    border: "1px solid #313131",
+                  }}
                 />
 
                 <div className="modal-actions">
                   <label htmlFor="includePaymentLink">
                     <input
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "#ececec",
+                        border: "1px solid #313131",
+                      }}
                       type="checkbox"
                       name=""
                       id="includePaymentLink"
@@ -802,6 +861,11 @@ const UploadButton = () => {
                   </label>
                   <label htmlFor="includeChatbotLink">
                     <input
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "#ececec",
+                        border: "1px solid #313131",
+                      }}
                       type="checkbox"
                       name=""
                       id="includeChatbotLink"
@@ -813,9 +877,21 @@ const UploadButton = () => {
                     />
                     Add Chatbot Link
                   </label>
-                  <button onClick={closeModal}>Close</button>
-                  <button onClick={sendDocumentForSigning}>Send without Video</button>
-                  <button onClick={sendWithVideo}>Generate Video</button>
+                  <button style={{ backgroundColor: "orange", color: "#000" }} onClick={closeModal}>
+                    Close
+                  </button>
+                  <button
+                    style={{ backgroundColor: "orange", color: "#000" }}
+                    onClick={sendDocumentForSigning}
+                  >
+                    Send without Video
+                  </button>
+                  <button
+                    style={{ backgroundColor: "orange", color: "#000" }}
+                    onClick={sendWithVideo}
+                  >
+                    Generate Video
+                  </button>
                 </div>
               </div>
             </div>

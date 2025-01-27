@@ -2,9 +2,19 @@ import React, { useEffect, useState } from "react";
 import "./Dashboard.css";
 import Tooltip from "../components/global/tooltip/Tooltip";
 import { truncateWithDots } from "../utils/truncateWithDots";
+import Loader from "../components/global/Loader";
 
 const Dashboard = ({ handlePageChange }) => {
   const [clientData, setClientData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [actionType, setActionType] = useState("");
+
+  const actionHandler = (type) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
+  };
 
   useEffect(() => {
     // Fetch data from the backend API
@@ -23,6 +33,7 @@ const Dashboard = ({ handlePageChange }) => {
 
   return (
     <div className="dashboard">
+      {isLoading && <Loader />}
       <h2>Client Details</h2>
       <div className="table-container">
         <table>
@@ -33,10 +44,11 @@ const Dashboard = ({ handlePageChange }) => {
               <th>Dates</th>
               <th>Address</th>
               <th>Cost</th>
-              {/* <th>Email Content</th> */}
+              <th>Email Content</th>
               <th>Subject</th>
               <th>Recipient Email</th>
               <th>Heygen Video Link</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -89,6 +101,14 @@ const Dashboard = ({ handlePageChange }) => {
                 <td>{client.cost}</td>
                 {/* <td>{client.emailContent}</td> */}
                 <td>
+                  <Tooltip
+                    content={truncateWithDots(client.emailContent.slice(70), 100)}
+                    direction="bottom"
+                  >
+                    <span>{truncateWithDots(client.emailContent, 20)}</span>
+                  </Tooltip>
+                </td>
+                <td>
                   <Tooltip content={client.subject} direction="bottom">
                     <span>{truncateWithDots(client.subject, 35)}</span>
                   </Tooltip>
@@ -104,6 +124,36 @@ const Dashboard = ({ handlePageChange }) => {
                   >
                     Video
                   </a>
+                </td>
+                <td>
+                  <div style={{ display: "flex", gap: "5px" }}>
+                    <button
+                      style={{
+                        color: "#000",
+                        fontSize: "10px",
+                        padding: "3px",
+                        backgroundColor: "orange",
+                      }}
+                      onClick={() => {
+                        actionHandler("email");
+                      }}
+                    >
+                      Send Remainder Email
+                    </button>
+                    <button
+                      style={{
+                        color: "#000",
+                        fontSize: "10px",
+                        padding: "3px",
+                        backgroundColor: "orange",
+                      }}
+                      onClick={() => {
+                        actionHandler("call");
+                      }}
+                    >
+                      Remainder Call
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

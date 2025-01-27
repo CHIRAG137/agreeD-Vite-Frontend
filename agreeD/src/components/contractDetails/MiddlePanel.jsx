@@ -8,13 +8,28 @@ function MiddlePanel({ contractDetails }) {
   const [activeTab, setActiveTab] = React.useState("Overview");
 
   return (
-    <div className="middle-panel">
+    <div
+      className="middle-panel"
+      style={{
+        borderLeft: "3px solid #313131",
+        borderRight: "3px solid #313131",
+        backgroundColor: "transparent",
+      }}
+    >
       <div style={{ padding: "0.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <input style={{ margin: 0 }} type="text" placeholder="Search" />
-          <button style={{ marginTop: 0 }}>Collapse all</button>
+          <input
+            style={{
+              margin: 0,
+              backgroundColor: "transparent",
+              border: "1px solid #313131",
+              color: "#ececec",
+            }}
+            type="text"
+            placeholder="Search"
+          />
         </div>
-        <div style={{ display: "flex", borderBottom: "1px solid #ccc" }}>
+        <div style={{ display: "flex", borderBottom: "1px solid #313131" }}>
           {tabs.map((tab) => (
             <div
               className={`${activeTab === tab ? "active-tab" : ""}`}
